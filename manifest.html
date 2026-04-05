@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Task Manager | Менеджер задач</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100dvh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            position: sticky;
+            top: 0;
+            backdrop-filter: blur(30px);
+            padding: 8px;
+            border-radius: 16px;
+            z-index: 10;
+            border: 1px solid #333;
+            background: rgba(18, 18, 18, 0.7);
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        h1 {
+            font-weight: 300;
+            letter-spacing: -0.5px;
+            color: #ffffff;
+            font-size: 1.5rem;
+        }
+
+        .header-actions {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            gap: 8px;
+            flex-wrap: nowrap;
+            width: 100%;
+            max-width: 343px;
+        }
+
+        .header-btn, .filter-btn, .custom-dropdown .dropdown-toggle, .bulk-actions button, .clear-completed-btn {
+            background: transparent;
+            border: 1px solid #444;
+            color: #0d6efd;
+            font-size: 1rem;
+            border-radius: 14px;
+            padding: 8px 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .clear-completed-btn {
+            border-radius: 10px;
+            padding-left: 8px;
+        }
+
+        .header-btn {
+            border-radius: 12px;
+            width: 47px;
+            height: 47px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .header-btn:hover, .filter-btn:hover, .custom-dropdown .dropdown-toggle:hover, .bulk-actions button:hover, .clear-completed-btn:hover {
+            background: #0d6efd;
+            color: white;
+            border-color: #0d6efd;
+        }
+
+        .header-btn.active, .filter-btn.active {
+            background: #0d6efd;
+            color: white;
+            border-color: #0d6efd;
+        }
+
+        .search-row {
+            margin-bottom: 16px;
+        }
+        .search-input {
+            width: 100%;
+            background: transparent;
+            border: 1px solid #444;
+            border-radius: 14px;
+            padding: 0 16px;
+            height: 48px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .search-input:focus {
+            border-color: #0d6efd;
+        }
+
+        .filter-buttons-row {
+            margin-bottom: 24px;
+        }
+
+        .custom-dropdown {
+            position: relative;
+            display: block;
+            width: 100%;
+        }
+        .custom-dropdown .dropdown-toggle {
+            width: 100%;
+            justify-content: space-between;
+            background: transparent;
+            padding: 12px 16px;
+            font-size: 1rem;
+        }
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(30, 30, 30, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(69, 69, 79, 0.8);
+            border-radius: 16px;
+            z-index: 1000;
+            margin-top: 8px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+            display: none;
+            overflow: hidden;
+            animation: dropdownFade 0.2s ease;
+            padding: 5px;
+        }
+        @keyframes dropdownFade {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .dropdown-menu.show {
+            display: block;
+        }
+        .dropdown-item {
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.15s;
+            color: #e0e0e0;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-radius: 10px;
+        }
+        .dropdown-item i {
+            font-size: 1.2rem;
+            width: 24px;
+            color: #0d6efd;
+        }
+        .dropdown-item:hover {
+            background: #0d6efd;
+        }
+        .dropdown-item:hover i {
+            color: #fff;
+        }
+
+        .task-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 0 18px;
+            height: 66px;
+            background: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+            overflow: hidden;
+        }
+        .task-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        .task-item.priority-normal { border-color: #444; background: rgba(108, 117, 125, 0.1); }
+        .task-item.priority-medium { border-color: #ffc107; background: rgba(255, 193, 7, 0.1); }
+        .task-item.priority-high { border-color: #dc3545; background: rgba(220, 53, 69, 0.1); }
+
+        .task-item.priority-normal .counter-display { border-color: #444; }
+        .task-item.priority-medium .counter-display { border-color: #ffc107; color: #ffc107; }
+        .task-item.priority-high .counter-display { border-color: #dc3545; color: #dc3545; }
+
+        .task-item.completed { background: rgba(40, 167, 69, 0.15); border-color: #28a745; }
+
+        .task-item.completed .task-title {
+            text-decoration: line-through;
+            color: #888;
+        }
+
+        .task-title {
+            flex: 1;
+            margin: 0 16px;
+            font-size: 1.2rem;
+            line-height: 1.3;
+            color: #f0f0f0;
+            word-break: break-word;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .custom-checkbox, .selection-checkbox, .increment-btn {
+            width: 28px;
+            height: 28px;
+            background: #2a2a2a;
+            border: 2px solid #555;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .custom-checkbox:hover, .selection-checkbox:hover, .increment-btn:hover {
+            transform: scale(1.05);
+            border-color: #0d6efd;
+        }
+        .custom-checkbox.checked, .selection-checkbox.selected {
+            background: #0d6efd;
+            border-color: #0d6efd;
+            color: white;
+        }
+        .increment-btn {
+            font-weight: bold;
+            color: #0d6efd;
+        }
+        .increment-btn:hover {
+            background: #0d6efd;
+            border-color: #0d6efd;
+            color: white;
+        }
+
+        .counter-display {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 4px 12px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #0d6efd;
+            white-space: nowrap;
+            transition: right 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            z-index: 5;
+        }
+        .task-item .action-buttons.show ~ .counter-display { right: 150px; }
+        .task-item.completed .action-buttons.show ~ .counter-display { right: 107px; }
+
+        .action-buttons {
+            position: absolute;
+            right: 7px;
+            top: 50%;
+            transform: translateY(-50%) translateX(calc(100% + 8px));
+            opacity: 0;
+            transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1), opacity 0.25s ease;
+            display: flex;
+            gap: 8px;
+            pointer-events: none;
+            padding: 9px;
+            background: rgba(20, 20, 20, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid #444;
+            border-radius: 14px;
+            z-index: 10;
+        }
+        .action-buttons.show {
+            transform: translateY(-50%) translateX(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .btn-icon {
+            background: #1e1e1e;
+            border: 1px solid #555;
+            color: #0d6efd;
+            font-size: 1rem;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+        .btn-icon:hover { background: #0d6efd; color: white; }
+        .btn-icon.minus:hover { background: #dc3545; border-color: #dc3545; color: white; }
+
+        .progress-wrapper {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: transparent;
+        }
+        .progress-fill {
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            width: 0%;
+            transition: width 0.2s ease;
+            border-radius: 0px;
+            border-top-right-radius: 8px;
+            border-bottom-left-radius: 16px;
+        }
+
+        .bulk-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #444;
+            border-radius: 16px;
+            background: rgba(18, 18, 18, 0.7);
+        }
+        .bulk-actions span { color: #0d6efd; font-size: 0.9rem; }
+        .bulk-buttons-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            flex: 1;
+            justify-content: flex-end;
+        }
+        .bulk-btn {
+            flex: 1;
+            min-width: calc(33.333% - 8px);
+            background: transparent;
+            border: 1px solid #444;
+            color: #0d6efd;
+            padding: 8px 8px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            white-space: nowrap;
+        }
+        .bulk-btn:hover { background: #0d6efd; color: white; border-color: #0d6efd; }
+        @media (max-width: 550px) {
+            .bulk-buttons-grid { width: 100%; margin-top: 8px; }
+            .bulk-btn { min-width: calc(33.333% - 6px); font-size: 0.8rem; padding: 6px 4px; }
+        }
+
+        .divider-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-block: 16px;
+        }
+        .divider-line {
+            flex: 1;
+            height: 2px;
+            background: linear-gradient(to right, #333, transparent);
+        }
+        .divider-line.left { background: linear-gradient(to left, #333, transparent); }
+        .divider-line.right { background: linear-gradient(to right, #333, transparent); }
+        .divider-content { display: flex; align-items: center; gap: 12px; white-space: nowrap; }
+        .divider-text { color: #aaa; font-size: 1rem; }
+        .clear-completed-btn {
+            background: transparent;
+            border: 1px solid #ff4444;
+            color: #ff8888;
+            padding: 4px 12px 4px 8px;
+            font-size: 0.85rem;
+        }
+        .clear-completed-btn:hover { background: #dc3545; color: white; border-color: #dc3545; }
+
+        /* Общие стили для модальных окон (единый стиль) */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-overlay.show {
+            display: flex;
+        }
+        .modal-content {
+            background: #141414;
+            border: 1px solid #3f3f46;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            animation: modalAppear 0.3s ease;
+            margin: 15px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 20px;
+        }
+        @keyframes modalAppear {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #00bfff;
+            text-align: center;
+        }
+        .modal-body {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .form-control, .priority-select {
+            background: #18181b;
+            border: 1px solid #3f3f46;
+            color: #e4e4e7;
+            border-radius: 16px;
+            padding: 12px;
+            font-size: 1rem;
+            outline: none;
+        }
+        .modal-footer {
+            display: flex;
+            gap: 16px;
+        }
+        .btn {
+            padding: 12px;
+            border-radius: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            flex: 1;
+            transition: background 0.2s;
+        }
+        .btn-primary { background: #0d6efd; color: white; }
+        .btn-primary:hover { background: #0b5ed7; }
+        .btn-secondary { background: #27272a; color: #e4e4e7; }
+        .btn-secondary:hover { background: #3f3f46; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #bb2d3b; }
+
+        .undo-toast {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #0d6efd;
+            padding: 10px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            z-index: 200;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+        }
+        @media (max-width: 680px) {
+            .container { padding: 0; }
+            .header { flex-direction: column; align-items: stretch; text-align: center; }
+            .task-item { padding: 0 16px; height: auto; min-height: 66px; }
+            .task-title { margin: 12px 8px; font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Список задач</h1>
+        <div class="header-actions">
+            <button class="header-btn" id="exportBtn" title="Экспорт"><i class="bi bi-download"></i></button>
+            <button class="header-btn" id="importBtn" title="Импорт"><i class="bi bi-upload"></i></button>
+            <button class="header-btn" id="undoBtn" title="Отменить удаление"><i class="bi bi-arrow-return-left"></i></button>
+            <button class="header-btn" id="selectionModeBtn" title="Выделить"><i class="bi bi-check2-square"></i></button>
+            <button class="header-btn" id="addTaskBtn" title="Добавить (Ctrl+N)"><i class="bi bi-plus-lg"></i></button>
+            <button class="header-btn" id="toggleManageMode" title="Управление (Ctrl+M)"><i class="bi bi-pencil"></i></button>
+        </div>
+    </div>
+
+    <div class="search-row">
+        <input type="text" class="search-input" id="searchInput" placeholder="Поиск по названию...">
+    </div>
+
+    <div class="filter-buttons-row">
+        <div class="custom-dropdown" id="sortDropdown">
+            <button class="dropdown-toggle" id="sortToggle"><i class="bi bi-sort-down"></i> Сортировка <i class="bi bi-chevron-down"></i></button>
+            <div class="dropdown-menu" id="sortMenu">
+                <div class="dropdown-item" data-sort="createdAt_desc"><i class="bi bi-calendar3"></i> По дате (новые сверху)</div>
+                <div class="dropdown-item" data-sort="createdAt_asc"><i class="bi bi-calendar3"></i> По дате (старые сверху)</div>
+                <div class="dropdown-item" data-sort="title_asc"><i class="bi bi-sort-alpha-down"></i> По названию (А → Я)</div>
+                <div class="dropdown-item" data-sort="title_desc"><i class="bi bi-sort-alpha-up-alt"></i> По названию (Я → А)</div>
+                <div class="dropdown-item" data-sort="priority_high_low"><i class="bi bi-star-fill"></i> Приоритет (высокий → низкий)</div>
+                <div class="dropdown-item" data-sort="priority_low_high"><i class="bi bi-star"></i> Приоритет (низкий → высокий)</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="bulkPanel" style="display: none;" class="bulk-actions">
+        <span><i class="bi bi-check2-square"></i> Выбрано: <span id="selectedCount">0</span></span>
+        <div class="bulk-buttons-grid">
+            <button class="bulk-btn" id="bulkComplete"><i class="bi bi-check-lg"></i> Принять</button>
+            <button class="bulk-btn" id="bulkDelete"><i class="bi bi-trash"></i> Удалить</button>
+            <button class="bulk-btn" id="bulkPriorityNormal"><i class="bi bi-circle"></i> Обычный</button>
+            <button class="bulk-btn" id="bulkPriorityMedium"><i class="bi bi-exclamation-triangle"></i> Средний</button>
+            <button class="bulk-btn" id="bulkPriorityHigh"><i class="bi bi-exclamation-diamond"></i> Высокий</button>
+            <button class="bulk-btn" id="bulkClearSelection"><i class="bi bi-x-lg"></i> Снять</button>
+        </div>
+    </div>
+
+    <div id="activeTasks"></div>
+    <div id="completedDivider" class="divider-wrapper" style="display: none;">
+        <span class="divider-line left"></span>
+        <div class="divider-content"><span class="divider-text">Выполненные</span></div>
+        <span class="divider-line right"></span>
+        <button id="clearCompletedBtn" class="clear-completed-btn"><i class="bi bi-trash3"></i> Очистить</button>
+    </div>
+    <div id="completedTasks"></div>
+</div>
+
+<!-- Модальное окно подтверждения очистки (единый стиль) -->
+<div id="confirmClearModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Удалить все выполненные задачи?</h2>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" id="confirmClearNo">Отмена</button>
+            <button class="btn btn-danger" id="confirmClearYes">Да, удалить</button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно добавления/редактирования задачи -->
+<div class="modal-overlay" id="taskModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title" id="modalTitle">Добавить задачу</h2>
+        </div>
+        <div class="modal-body">
+            <input type="text" class="form-control" id="taskInput" placeholder="Название задачи">
+            <input type="number" class="form-control" id="taskGoal" placeholder="Количество (необязательно)" min="1">
+            <select id="taskPriority" class="priority-select">
+                <option value="normal">Обычный приоритет</option>
+                <option value="medium">Средний приоритет</option>
+                <option value="high">Высокий приоритет</option>
+            </select>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" id="cancelModalBtn">Отмена</button>
+            <button class="btn btn-primary" id="saveTaskBtn">Сохранить</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let tasks = [], nextId = 1, manageMode = false, selectionMode = false, selectedTaskIds = new Set(), lastDeletedTask = null, searchQuery = "", sortBy = "createdAt_desc";
+    const activeContainer = document.getElementById('activeTasks'), completedContainer = document.getElementById('completedTasks'), completedDivider = document.getElementById('completedDivider');
+    const searchInput = document.getElementById('searchInput'), addTaskBtn = document.getElementById('addTaskBtn'), toggleManageBtn = document.getElementById('toggleManageMode'), selectionModeBtn = document.getElementById('selectionModeBtn');
+    const exportBtn = document.getElementById('exportBtn'), importBtn = document.getElementById('importBtn'), undoBtn = document.getElementById('undoBtn'), clearCompletedBtn = document.getElementById('clearCompletedBtn');
+    const confirmClearModal = document.getElementById('confirmClearModal'), confirmClearYes = document.getElementById('confirmClearYes'), confirmClearNo = document.getElementById('confirmClearNo');
+    const modalOverlay = document.getElementById('taskModal'), taskInput = document.getElementById('taskInput'), taskGoal = document.getElementById('taskGoal'), taskPriority = document.getElementById('taskPriority');
+    const saveTaskBtn = document.getElementById('saveTaskBtn'), cancelModalBtn = document.getElementById('cancelModalBtn');
+    let editingTaskId = null;
+
+    function loadFromStorage() {
+        const stored = localStorage.getItem('darkTasksPro');
+        if (stored) {
+            tasks = JSON.parse(stored);
+            tasks = tasks.map(t => ({ ...t, createdAt: t.createdAt || Date.now(), priority: t.priority || 'normal', goal: t.goal !== undefined ? t.goal : null, current: t.current !== undefined ? t.current : null }));
+            nextId = tasks.length ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
+        } else {
+            tasks = [
+            	{ id: 1, title: 'Выпить Пива', completed: false, goal: null, current: null, priority: 'normal', createdAt: Date.now() - 86400000 },
+            	{ id: 2, title: 'Купить Пива', completed: true, goal: null, current: null, priority: 'medium', createdAt: Date.now() - 43200000 }];
+            nextId = 3;
+        }
+    }
+    function saveToStorage() { localStorage.setItem('darkTasksPro', JSON.stringify(tasks)); }
+    function filterTasks(list) { return list.filter(t => !searchQuery || t.title.toLowerCase().includes(searchQuery.toLowerCase())); }
+    function sortTasks(list) {
+        return [...list].sort((a, b) => {
+            switch (sortBy) {
+                case 'title_asc': return a.title.localeCompare(b.title);
+                case 'title_desc': return b.title.localeCompare(a.title);
+                case 'priority_high_low': { const order = { high:0, medium:1, normal:2 }; return (order[a.priority]??3) - (order[b.priority]??3); }
+                case 'priority_low_high': { const order = { normal:0, medium:1, high:2 }; return (order[a.priority]??3) - (order[b.priority]??3); }
+                case 'createdAt_asc': return a.createdAt - b.createdAt;
+                default: return b.createdAt - a.createdAt;
+            }
+        });
+    }
+    function showAllActionPanels() { document.querySelectorAll('.action-buttons').forEach(p => p.classList.add('show')); }
+    function hideAllActionPanels() { document.querySelectorAll('.action-buttons').forEach(p => p.classList.remove('show')); }
+
+    function render() {
+        let active = sortTasks(filterTasks(tasks.filter(t => !t.completed))), completed = sortTasks(filterTasks(tasks.filter(t => t.completed)));
+        activeContainer.innerHTML = active.map(t => taskToHtml(t)).join('');
+        completedContainer.innerHTML = completed.map(t => taskToHtml(t)).join('');
+        completedDivider.style.display = completed.length ? 'flex' : 'none';
+        document.getElementById('bulkPanel').style.display = (selectionMode && !manageMode) ? 'flex' : 'none';
+        document.getElementById('selectedCount').innerText = selectedTaskIds.size;
+        toggleManageBtn.classList.toggle('active', manageMode);
+        selectionModeBtn.classList.toggle('active', selectionMode);
+        if (manageMode && !selectionMode) requestAnimationFrame(() => showAllActionPanels());
+        attachDelegatedEvents();
+    }
+
+    function taskToHtml(task) {
+        const leftCtrl = selectionMode && !task.completed ? `<span class="selection-checkbox" data-id="${task.id}" data-action="toggleSelect">${selectedTaskIds.has(task.id) ? '<i class="bi bi-check-lg"></i>' : ''}</span>` :
+            (task.completed ? `<span class="custom-checkbox checked" data-id="${task.id}" data-action="toggleComplete"><i class="bi bi-check-lg"></i></span>` :
+            (task.goal && task.goal > 0 ? `<button class="increment-btn" data-id="${task.id}" data-action="increment">+</button>` : `<span class="custom-checkbox" data-id="${task.id}" data-action="toggleComplete"></span>`));
+        let actionsHtml = '';
+        if (manageMode && !selectionMode) {
+            actionsHtml = `<div class="action-buttons">
+                ${(task.goal && task.goal > 0 && !task.completed) ? `<button class="btn-icon minus" data-id="${task.id}" data-action="decrement"><i class="bi bi-dash-lg"></i></button>` : ''}
+                <button class="btn-icon" data-id="${task.id}" data-action="edit"><i class="bi bi-pencil-square"></i></button>
+                <button class="btn-icon" data-id="${task.id}" data-action="delete"><i class="bi bi-trash3"></i></button>
+            </div>`;
+        }
+        const counter = (task.goal && task.goal > 0) ? `<div class="counter-display">${task.current || 0}/${task.goal}</div>` : '';
+        const progress = (task.goal && task.goal > 0) ? `<div class="progress-wrapper"><div class="progress-fill" style="width: ${Math.min(100, ((task.current||0)/task.goal)*100)}%"></div></div>` : '';
+        return `<div class="task-item ${task.completed ? 'completed' : ''} priority-${task.priority}" data-id="${task.id}">${leftCtrl}<span class="task-title">${escapeHtml(task.title)}</span>${actionsHtml}${counter}${progress}</div>`;
+    }
+    function escapeHtml(str) { return str.replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+
+    function attachDelegatedEvents() {
+        const containers = [activeContainer, completedContainer];
+        containers.forEach(container => {
+            container.onclick = (e) => {
+                let target = e.target.closest('[data-action]');
+                if (!target) return;
+                const id = parseInt(target.dataset.id), action = target.dataset.action;
+                e.stopPropagation();
+                if (action === 'toggleComplete') toggleTaskCompletion(id);
+                else if (action === 'toggleSelect') toggleSelectTask(id);
+                else if (action === 'increment') incrementCounter(id);
+                else if (action === 'decrement') decrementCounter(id);
+                else if (action === 'edit') openEditModal(id);
+                else if (action === 'delete') deleteTaskWithUndo(id);
+            };
+        });
+    }
+    function toggleTaskCompletion(id) { const t = tasks.find(t=>t.id===id); if(t){ if(t.completed && t.goal) t.current = t.goal-1; t.completed=!t.completed; saveToStorage(); render(); } }
+    function incrementCounter(id) { const t = tasks.find(t=>t.id===id); if(t && !t.completed && t.goal){ t.current = (t.current||0)+1; if(t.current >= t.goal) t.completed=true; saveToStorage(); render(); } }
+    function decrementCounter(id) { const t = tasks.find(t=>t.id===id); if(t && t.goal){ if(t.completed){ t.completed=false; t.current = t.goal-1; } else { t.current = Math.max(0,(t.current||0)-1); } saveToStorage(); render(); } }
+    function deleteTaskWithUndo(id) { const idx = tasks.findIndex(t=>t.id===id); if(idx!==-1){ lastDeletedTask = {...tasks[idx]}; tasks.splice(idx,1); saveToStorage(); render(); showUndoToast(); } }
+    function undoDelete() { if(lastDeletedTask){ tasks.push(lastDeletedTask); lastDeletedTask=null; saveToStorage(); render(); } }
+    function showUndoToast() { const toast = document.createElement('div'); toast.className='undo-toast'; toast.innerHTML='Задача удалена. <u>Отменить</u>'; toast.onclick=()=>{ undoDelete(); toast.remove(); }; document.body.appendChild(toast); setTimeout(()=>toast.remove(),5000); }
+    function openEditModal(id){ const t=tasks.find(t=>t.id===id); if(t){ editingTaskId=id; document.getElementById('modalTitle').textContent='Редактировать задачу'; taskInput.value=t.title; taskGoal.value=t.goal||''; taskPriority.value=t.priority||'normal'; modalOverlay.classList.add('show'); } }
+    function openAddModal(){ editingTaskId=null; document.getElementById('modalTitle').textContent='Добавить задачу'; taskInput.value=''; taskGoal.value=''; taskPriority.value='normal'; modalOverlay.classList.add('show'); }
+    function saveTask(){ const title=taskInput.value.trim(); if(!title) return; const goalRaw=taskGoal.value.trim(); const goal=goalRaw===''?null:parseInt(goalRaw,10); const validGoal=(goal&&goal>0)?goal:null; const priority=taskPriority.value; if(editingTaskId!==null){ const t=tasks.find(t=>t.id===editingTaskId); if(t){ t.title=title; t.priority=priority; if(validGoal){ t.goal=validGoal; t.current=t.current||0; if(t.current>=t.goal) t.completed=true; } else { t.goal=null; t.current=null; } } } else { tasks.push({ id:nextId++, title, completed:false, goal:validGoal, current:validGoal?0:null, priority, createdAt:Date.now() }); } saveToStorage(); closeModal(); render(); }
+    function closeModal(){ modalOverlay.classList.remove('show'); editingTaskId=null; }
+    function toggleSelectTask(id){ if(selectedTaskIds.has(id)) selectedTaskIds.delete(id); else selectedTaskIds.add(id); render(); }
+    function bulkComplete(){ for(let id of selectedTaskIds){ const t=tasks.find(t=>t.id===id); if(t&&!t.completed) t.completed=true; } selectedTaskIds.clear(); saveToStorage(); render(); }
+    function bulkDelete(){ tasks=tasks.filter(t=>!selectedTaskIds.has(t.id)); selectedTaskIds.clear(); saveToStorage(); render(); }
+    function bulkSetPriority(priority){ for(let id of selectedTaskIds){ const t=tasks.find(t=>t.id===id); if(t) t.priority=priority; } saveToStorage(); render(); }
+    function clearSelection(){ selectedTaskIds.clear(); render(); }
+    function exportData(){ const blob=new Blob([JSON.stringify(tasks,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`tasks_${Date.now()}.json`; a.click(); URL.revokeObjectURL(a.href); }
+    function importData(){ const input=document.createElement('input'); input.type='file'; input.accept='application/json'; input.onchange=e=>{ const file=e.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=ev=>{ try{ const imported=JSON.parse(ev.target.result); if(Array.isArray(imported)&&confirm('Заменить текущий список?')){ tasks=imported.map(t=>({...t, createdAt:t.createdAt||Date.now(), priority:t.priority||'normal'})); nextId=tasks.length?Math.max(...tasks.map(t=>t.id))+1:1; saveToStorage(); render(); } } catch(e){ alert('Ошибка файла'); } }; reader.readAsText(file); }; input.click(); }
+    function showClearConfirmModal(){ confirmClearModal.classList.add('show'); }
+    function clearCompletedConfirmed(){ tasks=tasks.filter(t=>!t.completed); saveToStorage(); render(); confirmClearModal.classList.remove('show'); }
+    function cancelClear(){ confirmClearModal.classList.remove('show'); }
+    function toggleManageMode(){ if(manageMode){ hideAllActionPanels(); setTimeout(()=>{ manageMode=false; selectionMode=false; render(); },300); } else { manageMode=true; selectionMode=false; render(); } }
+    function toggleSelectionMode(){ selectionMode=!selectionMode; if(selectionMode) manageMode=false; selectedTaskIds.clear(); render(); }
+
+    document.addEventListener('keydown',(e)=>{ if((e.ctrlKey||e.metaKey)&&e.key==='n'){ e.preventDefault(); openAddModal(); } if((e.ctrlKey||e.metaKey)&&e.key==='m'){ e.preventDefault(); toggleManageMode(); } if(e.key==='Escape'&&modalOverlay.classList.contains('show')) closeModal(); if(e.key==='Escape'&&confirmClearModal.classList.contains('show')) cancelClear(); });
+    function initDropdown(){ const toggle=document.getElementById('sortToggle'), menu=document.getElementById('sortMenu'); if(!toggle||!menu) return; toggle.onclick=(e)=>{ e.stopPropagation(); menu.classList.toggle('show'); }; menu.querySelectorAll('.dropdown-item').forEach(item=>{ item.onclick=(e)=>{ const sortValue=item.dataset.sort; if(sortValue){ sortBy=sortValue; const icon=toggle.querySelector('i:first-child').cloneNode(true); const text=item.innerText.trim(); toggle.innerHTML=''; toggle.appendChild(icon); toggle.appendChild(document.createTextNode(' '+text+' ')); const chevron=document.createElement('i'); chevron.className='bi bi-chevron-down'; toggle.appendChild(chevron); render(); } menu.classList.remove('show'); }; }); document.addEventListener('click',()=>menu.classList.remove('show')); }
+    searchInput.addEventListener('input',(e)=>{ searchQuery=e.target.value; render(); });
+    addTaskBtn.onclick=openAddModal; toggleManageBtn.onclick=toggleManageMode; selectionModeBtn.onclick=toggleSelectionMode; exportBtn.onclick=exportData; importBtn.onclick=importData; undoBtn.onclick=undoDelete; clearCompletedBtn.onclick=showClearConfirmModal; confirmClearYes.onclick=clearCompletedConfirmed; confirmClearNo.onclick=cancelClear; saveTaskBtn.onclick=saveTask; cancelModalBtn.onclick=closeModal; modalOverlay.onclick=(e)=>{ if(e.target===modalOverlay) closeModal(); };
+    document.getElementById('bulkComplete').onclick=bulkComplete; document.getElementById('bulkDelete').onclick=bulkDelete; document.getElementById('bulkPriorityNormal').onclick=()=>bulkSetPriority('normal'); document.getElementById('bulkPriorityMedium').onclick=()=>bulkSetPriority('medium'); document.getElementById('bulkPriorityHigh').onclick=()=>bulkSetPriority('high'); document.getElementById('bulkClearSelection').onclick=clearSelection;
+    loadFromStorage(); initDropdown(); render();
+</script>
+</body>
+</html>
