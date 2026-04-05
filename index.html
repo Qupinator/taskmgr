@@ -25,11 +25,12 @@
         }
 
         .container {
-            max-width: 800px;
+            max-width: 900px;
             width: 100%;
             margin: 0 auto;
         }
 
+        /* Хедер: десктопные отступы */
         .header {
             display: flex;
             justify-content: space-between;
@@ -38,12 +39,12 @@
             position: sticky;
             top: 0;
             backdrop-filter: blur(30px);
-            padding: 8px;
+            padding: 12px 20px 12px 24px;
             border-radius: 16px;
             z-index: 10;
             border: 1px solid #333;
             background: rgba(18, 18, 18, 0.7);
-            gap: 8px;
+            gap: 16px;
             flex-wrap: wrap;
         }
 
@@ -52,16 +53,14 @@
             letter-spacing: -0.5px;
             color: #ffffff;
             font-size: 1.5rem;
+            margin-left: 4px;
         }
 
         .header-actions {
             display: flex;
             flex-direction: row;
-            justify-content: space-between;
             gap: 8px;
             flex-wrap: nowrap;
-            width: 100%;
-            max-width: 343px;
         }
 
         .header-btn, .filter-btn, .custom-dropdown .dropdown-toggle, .bulk-actions button, .clear-completed-btn {
@@ -70,7 +69,7 @@
             color: #0d6efd;
             font-size: 1rem;
             border-radius: 14px;
-            padding: 8px 14px;
+            padding: 8px;
             cursor: pointer;
             transition: all 0.2s;
             display: inline-flex;
@@ -105,8 +104,20 @@
             border-color: #0d6efd;
         }
 
-        .search-row {
-            margin-bottom: 16px;
+        /* Панель поиска + фильтр в одной строке на десктопе */
+        .search-filter-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .search-wrapper {
+            flex: 2;
+            min-width: 180px;
+        }
+        .filter-wrapper {
+            flex: 1;
+            min-width: 160px;
         }
         .search-input {
             width: 100%;
@@ -124,10 +135,7 @@
             border-color: #0d6efd;
         }
 
-        .filter-buttons-row {
-            margin-bottom: 24px;
-        }
-
+        /* Кастомный дропдаун (общий стиль) */
         .custom-dropdown {
             position: relative;
             display: block;
@@ -140,32 +148,41 @@
             padding: 12px 16px;
             font-size: 1rem;
         }
+        .dropdown-toggle .bi-chevron-down {
+            transition: transform 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+        .custom-dropdown.open .dropdown-toggle .bi-chevron-down {
+            transform: rotate(180deg);
+        }
         .dropdown-menu {
             position: absolute;
             top: 100%;
             left: 0;
             right: 0;
-            background: rgba(30, 30, 30, 0.7);
-            backdrop-filter: blur(10px);
+            background: rgba(30, 30, 30, 0.96);
+            backdrop-filter: blur(12px);
             border: 1px solid rgba(69, 69, 79, 0.8);
             border-radius: 16px;
             z-index: 1000;
             margin-top: 8px;
             box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
             display: none;
+            flex-direction: column;
             overflow: hidden;
             animation: dropdownFade 0.2s ease;
-            padding: 5px;
+            padding: 6px;
+            gap: 6px;
         }
+        
         @keyframes dropdownFade {
             from { opacity: 0; transform: translateY(-8px); }
             to { opacity: 1; transform: translateY(0); }
         }
         .dropdown-menu.show {
-            display: block;
+            display: flex;
         }
         .dropdown-item {
-            padding: 10px 20px;
+            padding: 10px;
             cursor: pointer;
             transition: all 0.15s;
             color: #e0e0e0;
@@ -173,20 +190,34 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            border-radius: 10px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
         }
-        .dropdown-item i {
+        .dropdown-item i, .dropdown-item .bi {
             font-size: 1.2rem;
-            width: 24px;
             color: #0d6efd;
         }
         .dropdown-item:hover {
             background: #0d6efd;
+            color: white;
         }
-        .dropdown-item:hover i {
-            color: #fff;
+        .dropdown-item:hover i, .dropdown-item:hover .bi {
+            color: white;
+        }
+        /* Активный пункт меню */
+        .dropdown-item.active {
+            background: rgba(13, 110, 253, 0.25);
+            font-weight: 600;
+        }
+        .dropdown-item.active .bi-check-lg {
+            margin-left: auto;
+            color: #0d6efd;
+        }
+        .dropdown-item:hover.active .bi-check-lg {
+            color: white;
         }
 
+        /* Стили задач */
         .task-item {
             position: relative;
             display: flex;
@@ -195,7 +226,7 @@
             height: 66px;
             background: #1e1e1e;
             border: 1px solid #333;
-            border-radius: 16px;
+            border-radius: 14px;
             margin-bottom: 12px;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
             transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
@@ -382,7 +413,7 @@
             white-space: nowrap;
         }
         .bulk-btn:hover { background: #0d6efd; color: white; border-color: #0d6efd; }
-        @media (max-width: 550px) {
+        @media (max-width: 680px) {
             .bulk-buttons-grid { width: 100%; margin-top: 8px; }
             .bulk-btn { min-width: calc(33.333% - 6px); font-size: 0.8rem; padding: 6px 4px; }
         }
@@ -411,7 +442,7 @@
         }
         .clear-completed-btn:hover { background: #dc3545; color: white; border-color: #dc3545; }
 
-        /* Общие стили для модальных окон (единый стиль) */
+        /* Модальные окна */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -430,25 +461,26 @@
         .modal-content {
             background: #141414;
             border: 1px solid #3f3f46;
-            border-radius: 16px;
+            border-radius: 28px;
             width: 100%;
-            max-width: 400px;
+            max-width: 480px;
             animation: modalAppear 0.3s ease;
-            margin: 15px;
-            overflow: hidden;
+            margin: 20px;
+            overflow: visible;
             display: flex;
             flex-direction: column;
-            gap: 20px;
-            padding: 20px;
+            gap: 16px;
+            padding: 24px;
+            position: relative;
         }
         @keyframes modalAppear {
-            from { opacity: 0; transform: scale(0.9); }
+            from { opacity: 0; transform: scale(0.95); }
             to { opacity: 1; transform: scale(1); }
         }
         .modal-title {
             font-size: 1.8rem;
             font-weight: 700;
-            color: #00bfff;
+            color: #0d6efd;
             text-align: center;
         }
         .modal-body {
@@ -456,22 +488,48 @@
             flex-direction: column;
             gap: 16px;
         }
-        .form-control, .priority-select {
+        .form-control {
             background: #18181b;
             border: 1px solid #3f3f46;
             color: #e4e4e7;
-            border-radius: 16px;
-            padding: 12px;
+            border-radius: 14px;
+            padding: 12px 16px;
             font-size: 1rem;
             outline: none;
+            width: 100%;
+        }
+        .form-control:focus {
+            border-color: #0d6efd;
+        }
+        .row-flex {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: nowrap;
+        }
+        .row-flex .form-control,
+        .row-flex .custom-dropdown {
+            flex: 1;
+            min-width: 0;
+            width: 100%;
+            min-width: 143px;
+        }
+        .modal-body .custom-dropdown .dropdown-menu {
+            width: 100%;
+            left: auto;
+            right: 0;
+            max-height: 220px;
+            overflow-y: auto;
+            min-width: 302px;
         }
         .modal-footer {
             display: flex;
             gap: 16px;
+            margin-top: 6px;
         }
         .btn {
             padding: 12px;
-            border-radius: 16px;
+            border-radius: 18px;
             font-weight: 700;
             cursor: pointer;
             border: none;
@@ -499,9 +557,12 @@
         }
         @media (max-width: 680px) {
             .container { padding: 0; }
-            .header { flex-direction: column; align-items: stretch; text-align: center; }
+            .header { flex-direction: column; align-items: stretch; text-align: center; padding: 8px; }
+            .header-actions { justify-content: center; }
             .task-item { padding: 0 16px; height: auto; min-height: 66px; }
             .task-title { margin: 12px 8px; font-size: 1rem; }
+            .search-filter-row { flex-direction: column; gap: 12px; }
+            .search-wrapper, .filter-wrapper { width: 100%; }
         }
     </style>
 </head>
@@ -519,20 +580,22 @@
         </div>
     </div>
 
-    <div class="search-row">
-        <input type="text" class="search-input" id="searchInput" placeholder="Поиск по названию...">
-    </div>
-
-    <div class="filter-buttons-row">
-        <div class="custom-dropdown" id="sortDropdown">
-            <button class="dropdown-toggle" id="sortToggle"><i class="bi bi-sort-down"></i> Сортировка <i class="bi bi-chevron-down"></i></button>
-            <div class="dropdown-menu" id="sortMenu">
-                <div class="dropdown-item" data-sort="createdAt_desc"><i class="bi bi-calendar3"></i> По дате (новые сверху)</div>
-                <div class="dropdown-item" data-sort="createdAt_asc"><i class="bi bi-calendar3"></i> По дате (старые сверху)</div>
-                <div class="dropdown-item" data-sort="title_asc"><i class="bi bi-sort-alpha-down"></i> По названию (А → Я)</div>
-                <div class="dropdown-item" data-sort="title_desc"><i class="bi bi-sort-alpha-up-alt"></i> По названию (Я → А)</div>
-                <div class="dropdown-item" data-sort="priority_high_low"><i class="bi bi-star-fill"></i> Приоритет (высокий → низкий)</div>
-                <div class="dropdown-item" data-sort="priority_low_high"><i class="bi bi-star"></i> Приоритет (низкий → высокий)</div>
+    <!-- Поиск + фильтр в одной строке -->
+    <div class="search-filter-row">
+        <div class="search-wrapper">
+            <input type="text" class="search-input" id="searchInput" placeholder="Поиск по названию...">
+        </div>
+        <div class="filter-wrapper">
+            <div class="custom-dropdown" id="sortDropdown">
+                <button class="dropdown-toggle" id="sortToggle"><i class="bi bi-sort-down"></i> Сортировка <i class="bi bi-chevron-down"></i></button>
+                <div class="dropdown-menu" id="sortMenu">
+                    <div class="dropdown-item" data-sort="createdAt_desc"><i class="bi bi-calendar3"></i> По дате (Сначала новые)</div>
+                    <div class="dropdown-item" data-sort="createdAt_asc"><i class="bi bi-calendar3"></i> По дате (Сначала старые)</div>
+                    <div class="dropdown-item" data-sort="title_asc"><i class="bi bi-sort-alpha-down"></i> По названию (от А до Я)</div>
+                    <div class="dropdown-item" data-sort="title_desc"><i class="bi bi-sort-alpha-down-alt"></i> По названию (от Я до А)</div>
+                    <div class="dropdown-item" data-sort="priority_high_low"><i class="bi bi-star-fill"></i> Приоритет (Сначала высокий)</div>
+                    <div class="dropdown-item" data-sort="priority_low_high"><i class="bi bi-star"></i> Приоритет (Сначала низкий)</div>
+                </div>
             </div>
         </div>
     </div>
@@ -559,7 +622,7 @@
     <div id="completedTasks"></div>
 </div>
 
-<!-- Модальное окно подтверждения очистки (единый стиль) -->
+<!-- Модальное окно подтверждения очистки -->
 <div id="confirmClearModal" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
@@ -580,12 +643,17 @@
         </div>
         <div class="modal-body">
             <input type="text" class="form-control" id="taskInput" placeholder="Название задачи">
-            <input type="number" class="form-control" id="taskGoal" placeholder="Количество (необязательно)" min="1">
-            <select id="taskPriority" class="priority-select">
-                <option value="normal">Обычный приоритет</option>
-                <option value="medium">Средний приоритет</option>
-                <option value="high">Высокий приоритет</option>
-            </select>
+            <div class="row-flex">
+                <input type="number" class="form-control" id="taskGoal" placeholder="Количество" min="1" step="1">
+                <div class="custom-dropdown" id="priorityModalDropdown">
+                    <button class="dropdown-toggle" id="priorityModalToggle"><i class="bi bi-dot"></i> Обычный <i class="bi bi-chevron-down"></i></button>
+                    <div class="dropdown-menu" id="priorityModalMenu">
+                        <div class="dropdown-item" data-priority="normal"><i class="bi bi-dot"></i> Обычный</div>
+                        <div class="dropdown-item" data-priority="medium"><i class="bi bi-exclamation-triangle"></i> Средний</div>
+                        <div class="dropdown-item" data-priority="high"><i class="bi bi-exclamation-diamond"></i> Высокий</div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="modal-footer">
             <button class="btn btn-secondary" id="cancelModalBtn">Отмена</button>
@@ -600,10 +668,128 @@
     const searchInput = document.getElementById('searchInput'), addTaskBtn = document.getElementById('addTaskBtn'), toggleManageBtn = document.getElementById('toggleManageMode'), selectionModeBtn = document.getElementById('selectionModeBtn');
     const exportBtn = document.getElementById('exportBtn'), importBtn = document.getElementById('importBtn'), undoBtn = document.getElementById('undoBtn'), clearCompletedBtn = document.getElementById('clearCompletedBtn');
     const confirmClearModal = document.getElementById('confirmClearModal'), confirmClearYes = document.getElementById('confirmClearYes'), confirmClearNo = document.getElementById('confirmClearNo');
-    const modalOverlay = document.getElementById('taskModal'), taskInput = document.getElementById('taskInput'), taskGoal = document.getElementById('taskGoal'), taskPriority = document.getElementById('taskPriority');
+    const modalOverlay = document.getElementById('taskModal'), taskInput = document.getElementById('taskInput'), taskGoal = document.getElementById('taskGoal');
     const saveTaskBtn = document.getElementById('saveTaskBtn'), cancelModalBtn = document.getElementById('cancelModalBtn');
     let editingTaskId = null;
 
+    // --- кастомный приоритет в модалке ---
+    let selectedPriority = "normal";
+    const priorityDropdown = document.getElementById('priorityModalDropdown');
+    const priorityToggle = document.getElementById('priorityModalToggle');
+    const priorityMenu = document.getElementById('priorityModalMenu');
+    function updatePriorityUI(priority) {
+        const iconMap = { normal: "bi-dot", medium: "bi-exclamation-triangle", high: "bi-exclamation-diamond" };
+        const textMap = { normal: "Обычный", medium: "Средний", high: "Высокий" };
+        priorityToggle.innerHTML = `<i class="${iconMap[priority]}"></i> ${textMap[priority]} <i class="bi bi-chevron-down"></i>`;
+        selectedPriority = priority;
+    }
+    function initPriorityDropdown() {
+        priorityToggle.onclick = (e) => {
+            e.stopPropagation();
+            priorityDropdown.classList.toggle('open');
+            priorityMenu.classList.toggle('show');
+        };
+        priorityMenu.querySelectorAll('.dropdown-item').forEach(item => {
+            item.onclick = (e) => {
+                const val = item.dataset.priority;
+                if (val) updatePriorityUI(val);
+                priorityMenu.classList.remove('show');
+                priorityDropdown.classList.remove('open');
+                e.stopPropagation();
+            };
+        });
+        document.addEventListener('click', (e) => {
+            if (!priorityDropdown.contains(e.target)) {
+                priorityMenu.classList.remove('show');
+                priorityDropdown.classList.remove('open');
+            }
+        });
+    }
+    function getSelectedPriority() { return selectedPriority; }
+    function setPriorityDropdownValue(priority) { updatePriorityUI(priority); }
+
+    // --- сортировочный дропдаун с активным пунктом ---
+    const sortDropdown = document.getElementById('sortDropdown');
+    const sortToggle = document.getElementById('sortToggle');
+    const sortMenu = document.getElementById('sortMenu');
+    
+    function updateSortButtonText() {
+        const items = document.querySelectorAll('#sortMenu .dropdown-item');
+        let selectedItem = null;
+        for (let item of items) {
+            if (item.dataset.sort === sortBy) {
+                selectedItem = item;
+                break;
+            }
+        }
+        if (selectedItem) {
+            const iconClone = selectedItem.querySelector('i:first-child')?.cloneNode(true) || document.createElement('i');
+            const rawText = selectedItem.innerText.trim();
+            sortToggle.innerHTML = '';
+            sortToggle.appendChild(iconClone);
+            sortToggle.appendChild(document.createTextNode(' ' + rawText + ' '));
+            const chevron = document.createElement('i');
+            chevron.className = 'bi bi-chevron-down';
+            sortToggle.appendChild(chevron);
+        } else {
+            // fallback (не должно случиться)
+            sortToggle.innerHTML = '<i class="bi bi-sort-down"></i> Сортировка <i class="bi bi-chevron-down"></i>';
+        }
+    }
+    
+    function updateSortMenuActive() {
+        const items = document.querySelectorAll('#sortMenu .dropdown-item');
+        let activeItem = null;
+        items.forEach(item => {
+            if (item.dataset.sort === sortBy) {
+                activeItem = item;
+            }
+            // удаляем старую галочку и класс active
+            const existingCheck = item.querySelector('.active-check');
+            if (existingCheck) existingCheck.remove();
+            item.classList.remove('active');
+        });
+        if (activeItem) {
+            activeItem.classList.add('active');
+            const checkSpan = document.createElement('i');
+            checkSpan.className = 'bi bi-check-circle-fill active-check';
+            checkSpan.style.marginLeft = 'auto';
+            activeItem.appendChild(checkSpan);
+        }
+    }
+    
+    function initSortDropdown() {
+        sortToggle.onclick = (e) => {
+            e.stopPropagation();
+            sortDropdown.classList.toggle('open');
+            sortMenu.classList.toggle('show');
+        };
+        sortMenu.querySelectorAll('.dropdown-item').forEach(item => {
+            item.onclick = (e) => {
+                const sortValue = item.dataset.sort;
+                if (sortValue) {
+                    sortBy = sortValue;
+                    updateSortButtonText();
+                    updateSortMenuActive();
+                    render();
+                }
+                sortMenu.classList.remove('show');
+                sortDropdown.classList.remove('open');
+                e.stopPropagation();
+            };
+        });
+        document.addEventListener('click', (e) => {
+            if (!sortDropdown.contains(e.target)) {
+                sortMenu.classList.remove('show');
+                sortDropdown.classList.remove('open');
+            }
+        });
+        // начальная установка текста и активного пункта
+        updateSortButtonText();
+        updateSortMenuActive();
+    }
+
+    // --- основная логика ---
     function loadFromStorage() {
         const stored = localStorage.getItem('darkTasksPro');
         if (stored) {
@@ -688,9 +874,9 @@
     function deleteTaskWithUndo(id) { const idx = tasks.findIndex(t=>t.id===id); if(idx!==-1){ lastDeletedTask = {...tasks[idx]}; tasks.splice(idx,1); saveToStorage(); render(); showUndoToast(); } }
     function undoDelete() { if(lastDeletedTask){ tasks.push(lastDeletedTask); lastDeletedTask=null; saveToStorage(); render(); } }
     function showUndoToast() { const toast = document.createElement('div'); toast.className='undo-toast'; toast.innerHTML='Задача удалена. <u>Отменить</u>'; toast.onclick=()=>{ undoDelete(); toast.remove(); }; document.body.appendChild(toast); setTimeout(()=>toast.remove(),5000); }
-    function openEditModal(id){ const t=tasks.find(t=>t.id===id); if(t){ editingTaskId=id; document.getElementById('modalTitle').textContent='Редактировать задачу'; taskInput.value=t.title; taskGoal.value=t.goal||''; taskPriority.value=t.priority||'normal'; modalOverlay.classList.add('show'); } }
-    function openAddModal(){ editingTaskId=null; document.getElementById('modalTitle').textContent='Добавить задачу'; taskInput.value=''; taskGoal.value=''; taskPriority.value='normal'; modalOverlay.classList.add('show'); }
-    function saveTask(){ const title=taskInput.value.trim(); if(!title) return; const goalRaw=taskGoal.value.trim(); const goal=goalRaw===''?null:parseInt(goalRaw,10); const validGoal=(goal&&goal>0)?goal:null; const priority=taskPriority.value; if(editingTaskId!==null){ const t=tasks.find(t=>t.id===editingTaskId); if(t){ t.title=title; t.priority=priority; if(validGoal){ t.goal=validGoal; t.current=t.current||0; if(t.current>=t.goal) t.completed=true; } else { t.goal=null; t.current=null; } } } else { tasks.push({ id:nextId++, title, completed:false, goal:validGoal, current:validGoal?0:null, priority, createdAt:Date.now() }); } saveToStorage(); closeModal(); render(); }
+    function openEditModal(id){ const t=tasks.find(t=>t.id===id); if(t){ editingTaskId=id; document.getElementById('modalTitle').textContent='Редактировать задачу'; taskInput.value=t.title; taskGoal.value=t.goal||''; setPriorityDropdownValue(t.priority||'normal'); modalOverlay.classList.add('show'); } }
+    function openAddModal(){ editingTaskId=null; document.getElementById('modalTitle').textContent='Добавить задачу'; taskInput.value=''; taskGoal.value=''; setPriorityDropdownValue('normal'); modalOverlay.classList.add('show'); }
+    function saveTask(){ const title=taskInput.value.trim(); if(!title) return; const goalRaw=taskGoal.value.trim(); const goal=goalRaw===''?null:parseInt(goalRaw,10); const validGoal=(goal&&goal>0)?goal:null; const priority=getSelectedPriority(); if(editingTaskId!==null){ const t=tasks.find(t=>t.id===editingTaskId); if(t){ t.title=title; t.priority=priority; if(validGoal){ t.goal=validGoal; t.current=t.current||0; if(t.current>=t.goal) t.completed=true; } else { t.goal=null; t.current=null; } } } else { tasks.push({ id:nextId++, title, completed:false, goal:validGoal, current:validGoal?0:null, priority, createdAt:Date.now() }); } saveToStorage(); closeModal(); render(); }
     function closeModal(){ modalOverlay.classList.remove('show'); editingTaskId=null; }
     function toggleSelectTask(id){ if(selectedTaskIds.has(id)) selectedTaskIds.delete(id); else selectedTaskIds.add(id); render(); }
     function bulkComplete(){ for(let id of selectedTaskIds){ const t=tasks.find(t=>t.id===id); if(t&&!t.completed) t.completed=true; } selectedTaskIds.clear(); saveToStorage(); render(); }
@@ -706,11 +892,14 @@
     function toggleSelectionMode(){ selectionMode=!selectionMode; if(selectionMode) manageMode=false; selectedTaskIds.clear(); render(); }
 
     document.addEventListener('keydown',(e)=>{ if((e.ctrlKey||e.metaKey)&&e.key==='n'){ e.preventDefault(); openAddModal(); } if((e.ctrlKey||e.metaKey)&&e.key==='m'){ e.preventDefault(); toggleManageMode(); } if(e.key==='Escape'&&modalOverlay.classList.contains('show')) closeModal(); if(e.key==='Escape'&&confirmClearModal.classList.contains('show')) cancelClear(); });
-    function initDropdown(){ const toggle=document.getElementById('sortToggle'), menu=document.getElementById('sortMenu'); if(!toggle||!menu) return; toggle.onclick=(e)=>{ e.stopPropagation(); menu.classList.toggle('show'); }; menu.querySelectorAll('.dropdown-item').forEach(item=>{ item.onclick=(e)=>{ const sortValue=item.dataset.sort; if(sortValue){ sortBy=sortValue; const icon=toggle.querySelector('i:first-child').cloneNode(true); const text=item.innerText.trim(); toggle.innerHTML=''; toggle.appendChild(icon); toggle.appendChild(document.createTextNode(' '+text+' ')); const chevron=document.createElement('i'); chevron.className='bi bi-chevron-down'; toggle.appendChild(chevron); render(); } menu.classList.remove('show'); }; }); document.addEventListener('click',()=>menu.classList.remove('show')); }
     searchInput.addEventListener('input',(e)=>{ searchQuery=e.target.value; render(); });
     addTaskBtn.onclick=openAddModal; toggleManageBtn.onclick=toggleManageMode; selectionModeBtn.onclick=toggleSelectionMode; exportBtn.onclick=exportData; importBtn.onclick=importData; undoBtn.onclick=undoDelete; clearCompletedBtn.onclick=showClearConfirmModal; confirmClearYes.onclick=clearCompletedConfirmed; confirmClearNo.onclick=cancelClear; saveTaskBtn.onclick=saveTask; cancelModalBtn.onclick=closeModal; modalOverlay.onclick=(e)=>{ if(e.target===modalOverlay) closeModal(); };
     document.getElementById('bulkComplete').onclick=bulkComplete; document.getElementById('bulkDelete').onclick=bulkDelete; document.getElementById('bulkPriorityNormal').onclick=()=>bulkSetPriority('normal'); document.getElementById('bulkPriorityMedium').onclick=()=>bulkSetPriority('medium'); document.getElementById('bulkPriorityHigh').onclick=()=>bulkSetPriority('high'); document.getElementById('bulkClearSelection').onclick=clearSelection;
-    loadFromStorage(); initDropdown(); render();
+
+    loadFromStorage();
+    initSortDropdown();
+    initPriorityDropdown();
+    render();
 </script>
 </body>
 </html>
