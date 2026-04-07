@@ -30,7 +30,6 @@
             margin: 0 auto;
         }
 
-        /* Хедер: десктопные отступы */
         .header {
             display: flex;
             justify-content: space-between;
@@ -39,7 +38,7 @@
             position: sticky;
             top: 0;
             backdrop-filter: blur(30px);
-            padding: 12px 20px 12px 24px;
+            padding: 12px 12px 12px 24px;
             border-radius: 16px;
             z-index: 10;
             border: 1px solid #333;
@@ -104,7 +103,6 @@
             border-color: #0d6efd;
         }
 
-        /* Панель поиска + фильтр в одной строке на десктопе */
         .search-filter-row {
             display: flex;
             gap: 16px;
@@ -125,7 +123,7 @@
             border: 1px solid #444;
             border-radius: 14px;
             padding: 0 16px;
-            height: 48px;
+            height: 44px;
             color: white;
             font-size: 1rem;
             outline: none;
@@ -135,7 +133,6 @@
             border-color: #0d6efd;
         }
 
-        /* Кастомный дропдаун (общий стиль) */
         .custom-dropdown {
             position: relative;
             display: block;
@@ -147,6 +144,7 @@
             background: transparent;
             padding: 12px 16px;
             font-size: 1rem;
+            max-height: 44px;
         }
         .dropdown-toggle .bi-chevron-down {
             transition: transform 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
@@ -204,7 +202,6 @@
         .dropdown-item:hover i, .dropdown-item:hover .bi {
             color: white;
         }
-        /* Активный пункт меню */
         .dropdown-item.active {
             background: rgba(13, 110, 253, 0.25);
             font-weight: 600;
@@ -217,7 +214,20 @@
             color: white;
         }
 
-        /* Стили задач */
+        /* Цветные иконки приоритетов в модальном окне */
+        #priorityModalMenu .dropdown-item[data-priority="normal"] i.bi {
+            color: #9e9e9e; /* серый */
+        }
+        #priorityModalMenu .dropdown-item[data-priority="medium"] i.bi {
+            color: #ffc107; /* жёлтый */
+        }
+        #priorityModalMenu .dropdown-item[data-priority="high"] i.bi {
+            color: #dc3545; /* красный */
+        }
+        #priorityModalMenu .dropdown-item:hover i.bi {
+            color: white; /* при наведении стандартный белый */
+        }
+
         .task-item {
             position: relative;
             display: flex;
@@ -369,11 +379,12 @@
             height: 4px;
             background: transparent;
         }
+        /* Плавная анимация изменения ширины прогресс-бара */
         .progress-fill {
             height: 100%;
             background: rgba(255, 255, 255, 0.2);
             width: 0%;
-            transition: width 0.2s ease;
+            transition: width 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
             border-radius: 0px;
             border-top-right-radius: 8px;
             border-bottom-left-radius: 16px;
@@ -442,7 +453,6 @@
         }
         .clear-completed-btn:hover { background: #dc3545; color: white; border-color: #dc3545; }
 
-        /* Модальные окна */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -501,6 +511,10 @@
         .form-control:focus {
             border-color: #0d6efd;
         }
+        .form-control:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
         .row-flex {
             display: flex;
             gap: 16px;
@@ -514,13 +528,30 @@
             width: 100%;
             min-width: 143px;
         }
+        .input-with-icon {
+            position: relative;
+            flex: 1;
+        }
+        .input-with-icon .form-control {
+            padding-right: 2rem;
+        }
+        .input-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #0d6efd;
+            pointer-events: none;
+            font-size: 1.2rem;
+        }
+        
         .modal-body .custom-dropdown .dropdown-menu {
             width: 100%;
             left: auto;
             right: 0;
             max-height: 220px;
             overflow-y: auto;
-            min-width: 302px;
+            min-width: 286px;
         }
         .modal-footer {
             display: flex;
@@ -563,6 +594,7 @@
             .task-title { margin: 12px 8px; font-size: 1rem; }
             .search-filter-row { flex-direction: column; gap: 12px; }
             .search-wrapper, .filter-wrapper { width: 100%; }
+            .input-with-icon { width: 100%; }
         }
     </style>
 </head>
@@ -580,7 +612,6 @@
         </div>
     </div>
 
-    <!-- Поиск + фильтр в одной строке -->
     <div class="search-filter-row">
         <div class="search-wrapper">
             <input type="text" class="search-input" id="searchInput" placeholder="Поиск по названию...">
@@ -622,7 +653,6 @@
     <div id="completedTasks"></div>
 </div>
 
-<!-- Модальное окно подтверждения очистки -->
 <div id="confirmClearModal" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
@@ -635,23 +665,33 @@
     </div>
 </div>
 
-<!-- Модальное окно добавления/редактирования задачи -->
+<!-- Модальное окно добавления/редактирования задачи (обновлённое) -->
 <div class="modal-overlay" id="taskModal">
     <div class="modal-content">
         <div class="modal-header">
             <h2 class="modal-title" id="modalTitle">Добавить задачу</h2>
         </div>
         <div class="modal-body">
-            <input type="text" class="form-control" id="taskInput" placeholder="Название задачи">
+            <div class="input-with-icon">
+                <input type="text" class="form-control" id="taskInput" placeholder="Название задачи">
+                <i class="bi bi-alphabet input-icon"></i>
+            </div>
             <div class="row-flex">
-                <input type="number" class="form-control" id="taskGoal" placeholder="Количество" min="1" step="1">
-                <div class="custom-dropdown" id="priorityModalDropdown">
-                    <button class="dropdown-toggle" id="priorityModalToggle"><i class="bi bi-dot"></i> Обычный <i class="bi bi-chevron-down"></i></button>
-                    <div class="dropdown-menu" id="priorityModalMenu">
-                        <div class="dropdown-item" data-priority="normal"><i class="bi bi-dot"></i> Обычный</div>
-                        <div class="dropdown-item" data-priority="medium"><i class="bi bi-exclamation-triangle"></i> Средний</div>
-                        <div class="dropdown-item" data-priority="high"><i class="bi bi-exclamation-diamond"></i> Высокий</div>
-                    </div>
+                <div class="input-with-icon">
+                    <input type="number" class="form-control" id="taskCurrent" placeholder="Нач. значен." min="0" step="1" disabled>
+                    <i class="bi bi-123 input-icon"></i>
+                </div>
+                <div class="input-with-icon">
+                    <input type="number" class="form-control" id="taskGoal" placeholder="Количество" min="2" step="1">
+                    <i class="bi bi-123 input-icon"></i>
+                </div>
+            </div>
+            <div class="custom-dropdown" id="priorityModalDropdown">
+                <button class="dropdown-toggle" id="priorityModalToggle"><i class="bi bi-dot"></i> Приоритет <i class="bi bi-chevron-down"></i></button>
+                <div class="dropdown-menu" id="priorityModalMenu">
+                    <div class="dropdown-item" data-priority="normal"><i class="bi bi-dot"></i> Приоритет: Обычный</div>
+                    <div class="dropdown-item" data-priority="medium"><i class="bi bi-exclamation-triangle"></i> Приоритет: Средний</div>
+                    <div class="dropdown-item" data-priority="high"><i class="bi bi-exclamation-diamond"></i> Приоритет: Высокий</div>
                 </div>
             </div>
         </div>
@@ -668,21 +708,28 @@
     const searchInput = document.getElementById('searchInput'), addTaskBtn = document.getElementById('addTaskBtn'), toggleManageBtn = document.getElementById('toggleManageMode'), selectionModeBtn = document.getElementById('selectionModeBtn');
     const exportBtn = document.getElementById('exportBtn'), importBtn = document.getElementById('importBtn'), undoBtn = document.getElementById('undoBtn'), clearCompletedBtn = document.getElementById('clearCompletedBtn');
     const confirmClearModal = document.getElementById('confirmClearModal'), confirmClearYes = document.getElementById('confirmClearYes'), confirmClearNo = document.getElementById('confirmClearNo');
-    const modalOverlay = document.getElementById('taskModal'), taskInput = document.getElementById('taskInput'), taskGoal = document.getElementById('taskGoal');
+    const modalOverlay = document.getElementById('taskModal'), taskInput = document.getElementById('taskInput'), taskGoal = document.getElementById('taskGoal'), taskCurrent = document.getElementById('taskCurrent');
     const saveTaskBtn = document.getElementById('saveTaskBtn'), cancelModalBtn = document.getElementById('cancelModalBtn');
     let editingTaskId = null;
 
-    // --- кастомный приоритет в модалке ---
+    // --- приоритет в модалке с цветными иконками ---
     let selectedPriority = "normal";
     const priorityDropdown = document.getElementById('priorityModalDropdown');
     const priorityToggle = document.getElementById('priorityModalToggle');
     const priorityMenu = document.getElementById('priorityModalMenu');
+    
     function updatePriorityUI(priority) {
         const iconMap = { normal: "bi-dot", medium: "bi-exclamation-triangle", high: "bi-exclamation-diamond" };
         const textMap = { normal: "Обычный", medium: "Средний", high: "Высокий" };
         priorityToggle.innerHTML = `<i class="${iconMap[priority]}"></i> ${textMap[priority]} <i class="bi bi-chevron-down"></i>`;
+        const icon = priorityToggle.querySelector('i:first-child');
+        if (icon) {
+            const colorMap = { normal: '#9e9e9e', medium: '#ffc107', high: '#dc3545' };
+            icon.style.color = colorMap[priority];
+        }
         selectedPriority = priority;
     }
+    
     function initPriorityDropdown() {
         priorityToggle.onclick = (e) => {
             e.stopPropagation();
@@ -704,11 +751,33 @@
                 priorityDropdown.classList.remove('open');
             }
         });
+        updatePriorityUI('normal');
     }
     function getSelectedPriority() { return selectedPriority; }
     function setPriorityDropdownValue(priority) { updatePriorityUI(priority); }
 
-    // --- сортировочный дропдаун с активным пунктом ---
+    // --- управление полем current в зависимости от goal ---
+    function updateCurrentFieldState() {
+        const goalVal = taskGoal.value.trim();
+        if (goalVal === "") {
+            taskCurrent.disabled = true;
+            taskCurrent.value = "";
+            taskCurrent.max = "";
+        } else {
+            let goal = parseInt(goalVal, 10);
+            if (isNaN(goal)) goal = 2;
+            if (goal < 2) goal = 2;
+            taskCurrent.disabled = false;
+            const maxCurrent = goal - 1;
+            taskCurrent.max = maxCurrent;
+            let currentVal = taskCurrent.value.trim() === "" ? 0 : parseInt(taskCurrent.value, 10);
+            if (isNaN(currentVal)) currentVal = 0;
+            if (currentVal > maxCurrent) taskCurrent.value = maxCurrent;
+            else if (currentVal < 0) taskCurrent.value = 0;
+        }
+    }
+
+    // --- сортировочный дропдаун ---
     const sortDropdown = document.getElementById('sortDropdown');
     const sortToggle = document.getElementById('sortToggle');
     const sortMenu = document.getElementById('sortMenu');
@@ -732,7 +801,6 @@
             chevron.className = 'bi bi-chevron-down';
             sortToggle.appendChild(chevron);
         } else {
-            // fallback (не должно случиться)
             sortToggle.innerHTML = '<i class="bi bi-sort-down"></i> Сортировка <i class="bi bi-chevron-down"></i>';
         }
     }
@@ -744,7 +812,6 @@
             if (item.dataset.sort === sortBy) {
                 activeItem = item;
             }
-            // удаляем старую галочку и класс active
             const existingCheck = item.querySelector('.active-check');
             if (existingCheck) existingCheck.remove();
             item.classList.remove('active');
@@ -784,7 +851,6 @@
                 sortDropdown.classList.remove('open');
             }
         });
-        // начальная установка текста и активного пункта
         updateSortButtonText();
         updateSortMenuActive();
     }
@@ -874,10 +940,79 @@
     function deleteTaskWithUndo(id) { const idx = tasks.findIndex(t=>t.id===id); if(idx!==-1){ lastDeletedTask = {...tasks[idx]}; tasks.splice(idx,1); saveToStorage(); render(); showUndoToast(); } }
     function undoDelete() { if(lastDeletedTask){ tasks.push(lastDeletedTask); lastDeletedTask=null; saveToStorage(); render(); } }
     function showUndoToast() { const toast = document.createElement('div'); toast.className='undo-toast'; toast.innerHTML='Задача удалена. <u>Отменить</u>'; toast.onclick=()=>{ undoDelete(); toast.remove(); }; document.body.appendChild(toast); setTimeout(()=>toast.remove(),5000); }
-    function openEditModal(id){ const t=tasks.find(t=>t.id===id); if(t){ editingTaskId=id; document.getElementById('modalTitle').textContent='Редактировать задачу'; taskInput.value=t.title; taskGoal.value=t.goal||''; setPriorityDropdownValue(t.priority||'normal'); modalOverlay.classList.add('show'); } }
-    function openAddModal(){ editingTaskId=null; document.getElementById('modalTitle').textContent='Добавить задачу'; taskInput.value=''; taskGoal.value=''; setPriorityDropdownValue('normal'); modalOverlay.classList.add('show'); }
-    function saveTask(){ const title=taskInput.value.trim(); if(!title) return; const goalRaw=taskGoal.value.trim(); const goal=goalRaw===''?null:parseInt(goalRaw,10); const validGoal=(goal&&goal>0)?goal:null; const priority=getSelectedPriority(); if(editingTaskId!==null){ const t=tasks.find(t=>t.id===editingTaskId); if(t){ t.title=title; t.priority=priority; if(validGoal){ t.goal=validGoal; t.current=t.current||0; if(t.current>=t.goal) t.completed=true; } else { t.goal=null; t.current=null; } } } else { tasks.push({ id:nextId++, title, completed:false, goal:validGoal, current:validGoal?0:null, priority, createdAt:Date.now() }); } saveToStorage(); closeModal(); render(); }
-    function closeModal(){ modalOverlay.classList.remove('show'); editingTaskId=null; }
+    
+    function openEditModal(id){ 
+        const t = tasks.find(t=>t.id===id); 
+        if(t){ 
+            editingTaskId = id; 
+            document.getElementById('modalTitle').textContent = 'Редактировать задачу'; 
+            taskInput.value = t.title; 
+            taskGoal.value = t.goal !== null ? t.goal : ''; 
+            taskCurrent.value = (t.goal !== null && t.current !== null) ? t.current : ''; 
+            setPriorityDropdownValue(t.priority || 'normal'); 
+            updateCurrentFieldState();
+            modalOverlay.classList.add('show'); 
+        } 
+    }
+    
+    function openAddModal(){ 
+        editingTaskId = null; 
+        document.getElementById('modalTitle').textContent = 'Добавить задачу'; 
+        taskInput.value = ''; 
+        taskGoal.value = ''; 
+        taskCurrent.value = ''; 
+        setPriorityDropdownValue('normal'); 
+        updateCurrentFieldState();
+        modalOverlay.classList.add('show'); 
+    }
+    
+    function saveTask(){ 
+        const title = taskInput.value.trim(); 
+        if(!title) return; 
+        const goalRaw = taskGoal.value.trim(); 
+        const goal = goalRaw === '' ? null : parseInt(goalRaw, 10); 
+        let current = null;
+        if(goal !== null) {
+            let parsedCurrent = taskCurrent.value.trim() === '' ? 0 : parseInt(taskCurrent.value, 10);
+            if(isNaN(parsedCurrent)) parsedCurrent = 0;
+            const maxAllowed = goal - 1;
+            current = Math.min(Math.max(0, parsedCurrent), maxAllowed);
+        }
+        const priority = getSelectedPriority();
+        if(editingTaskId !== null){ 
+            const t = tasks.find(t=>t.id === editingTaskId); 
+            if(t){ 
+                t.title = title; 
+                t.priority = priority; 
+                if(goal !== null && goal >= 2){ 
+                    t.goal = goal; 
+                    t.current = (current !== null) ? current : (t.current !== undefined ? t.current : 0);
+                    if(t.current >= t.goal) t.completed = true;
+                    else if(t.completed && t.current < t.goal) t.completed = false;
+                } else { 
+                    t.goal = null; 
+                    t.current = null; 
+                } 
+            } 
+        } else { 
+            const newTask = { 
+                id: nextId++, 
+                title, 
+                completed: false, 
+                goal: (goal !== null && goal >= 2) ? goal : null, 
+                current: (goal !== null && goal >= 2) ? (current !== null ? current : 0) : null, 
+                priority, 
+                createdAt: Date.now() 
+            };
+            if(newTask.goal !== null && newTask.current >= newTask.goal) newTask.completed = true;
+            tasks.push(newTask); 
+        } 
+        saveToStorage(); 
+        closeModal(); 
+        render(); 
+    }
+    
+    function closeModal(){ modalOverlay.classList.remove('show'); editingTaskId = null; }
     function toggleSelectTask(id){ if(selectedTaskIds.has(id)) selectedTaskIds.delete(id); else selectedTaskIds.add(id); render(); }
     function bulkComplete(){ for(let id of selectedTaskIds){ const t=tasks.find(t=>t.id===id); if(t&&!t.completed) t.completed=true; } selectedTaskIds.clear(); saveToStorage(); render(); }
     function bulkDelete(){ tasks=tasks.filter(t=>!selectedTaskIds.has(t.id)); selectedTaskIds.clear(); saveToStorage(); render(); }
@@ -895,6 +1030,19 @@
     searchInput.addEventListener('input',(e)=>{ searchQuery=e.target.value; render(); });
     addTaskBtn.onclick=openAddModal; toggleManageBtn.onclick=toggleManageMode; selectionModeBtn.onclick=toggleSelectionMode; exportBtn.onclick=exportData; importBtn.onclick=importData; undoBtn.onclick=undoDelete; clearCompletedBtn.onclick=showClearConfirmModal; confirmClearYes.onclick=clearCompletedConfirmed; confirmClearNo.onclick=cancelClear; saveTaskBtn.onclick=saveTask; cancelModalBtn.onclick=closeModal; modalOverlay.onclick=(e)=>{ if(e.target===modalOverlay) closeModal(); };
     document.getElementById('bulkComplete').onclick=bulkComplete; document.getElementById('bulkDelete').onclick=bulkDelete; document.getElementById('bulkPriorityNormal').onclick=()=>bulkSetPriority('normal'); document.getElementById('bulkPriorityMedium').onclick=()=>bulkSetPriority('medium'); document.getElementById('bulkPriorityHigh').onclick=()=>bulkSetPriority('high'); document.getElementById('bulkClearSelection').onclick=clearSelection;
+
+    taskGoal.addEventListener('input', updateCurrentFieldState);
+    taskCurrent.addEventListener('input', function() {
+        if (!taskCurrent.disabled && taskGoal.value.trim() !== "") {
+            let goal = parseInt(taskGoal.value, 10);
+            if (!isNaN(goal) && goal >= 2) {
+                let val = parseInt(taskCurrent.value, 10);
+                if (isNaN(val)) val = 0;
+                if (val > goal - 1) taskCurrent.value = goal - 1;
+                if (val < 0) taskCurrent.value = 0;
+            }
+        }
+    });
 
     loadFromStorage();
     initSortDropdown();
