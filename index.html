@@ -379,7 +379,6 @@
             height: 4px;
             background: transparent;
         }
-        /* Плавная анимация изменения ширины прогресс-бара */
         .progress-fill {
             height: 100%;
             background: rgba(255, 255, 255, 0.2);
@@ -453,6 +452,25 @@
         }
         .clear-completed-btn:hover { background: #dc3545; color: white; border-color: #dc3545; }
 
+        /* Пустые состояния */
+        .empty-placeholder {
+            text-align: center;
+            padding: 40px 20px;
+            color: #888;
+            font-size: 1.1rem;
+            background: rgba(30,30,30,0.5);
+            border-radius: 24px;
+            margin: 20px 0;
+            backdrop-filter: blur(4px);
+        }
+        .empty-placeholder i {
+            font-size: 3rem;
+            margin-bottom: 12px;
+            display: block;
+            color: #555;
+        }
+
+        /* Модальные окна общие */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -498,61 +516,6 @@
             flex-direction: column;
             gap: 16px;
         }
-        .form-control {
-            background: #18181b;
-            border: 1px solid #3f3f46;
-            color: #e4e4e7;
-            border-radius: 14px;
-            padding: 12px 16px;
-            font-size: 1rem;
-            outline: none;
-            width: 100%;
-        }
-        .form-control:focus {
-            border-color: #0d6efd;
-        }
-        .form-control:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        .row-flex {
-            display: flex;
-            gap: 16px;
-            align-items: center;
-            flex-wrap: nowrap;
-        }
-        .row-flex .form-control,
-        .row-flex .custom-dropdown {
-            flex: 1;
-            min-width: 0;
-            width: 100%;
-            min-width: 143px;
-        }
-        .input-with-icon {
-            position: relative;
-            flex: 1;
-        }
-        .input-with-icon .form-control {
-            padding-right: 2rem;
-        }
-        .input-icon {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #0d6efd;
-            pointer-events: none;
-            font-size: 1.2rem;
-        }
-        
-        .modal-body .custom-dropdown .dropdown-menu {
-            width: 100%;
-            left: auto;
-            right: 0;
-            max-height: 220px;
-            overflow-y: auto;
-            min-width: 286px;
-        }
         .modal-footer {
             display: flex;
             gap: 16px;
@@ -573,6 +536,18 @@
         .btn-secondary:hover { background: #3f3f46; }
         .btn-danger { background: #dc3545; color: white; }
         .btn-danger:hover { background: #bb2d3b; }
+
+        .import-stats {
+            background: #1e1e1e;
+            padding: 12px;
+            border-radius: 16px;
+            margin: 8px 0;
+        }
+        .import-stats p {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+        }
 
         .undo-toast {
             position: fixed;
@@ -653,6 +628,7 @@
     <div id="completedTasks"></div>
 </div>
 
+<!-- Модальное окно подтверждения очистки -->
 <div id="confirmClearModal" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
@@ -665,7 +641,24 @@
     </div>
 </div>
 
-<!-- Модальное окно добавления/редактирования задачи (обновлённое) -->
+<!-- Кастомное модальное окно импорта -->
+<div id="importConfirmModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Импорт задач</h2>
+        </div>
+        <div class="modal-body">
+            <p>Вы уверены, что хотите заменить текущий список?</p>
+            <div class="import-stats" id="importStats"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" id="importCancelBtn">Отмена</button>
+            <button class="btn btn-primary" id="importConfirmBtn">Заменить</button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно добавления/редактирования задачи -->
 <div class="modal-overlay" id="taskModal">
     <div class="modal-content">
         <div class="modal-header">
@@ -704,10 +697,13 @@
 
 <script>
     let tasks = [], nextId = 1, manageMode = false, selectionMode = false, selectedTaskIds = new Set(), lastDeletedTask = null, searchQuery = "", sortBy = "createdAt_desc";
+    let pendingImportedTasks = null; // для хранения импортированных задач перед подтверждением
+
     const activeContainer = document.getElementById('activeTasks'), completedContainer = document.getElementById('completedTasks'), completedDivider = document.getElementById('completedDivider');
     const searchInput = document.getElementById('searchInput'), addTaskBtn = document.getElementById('addTaskBtn'), toggleManageBtn = document.getElementById('toggleManageMode'), selectionModeBtn = document.getElementById('selectionModeBtn');
     const exportBtn = document.getElementById('exportBtn'), importBtn = document.getElementById('importBtn'), undoBtn = document.getElementById('undoBtn'), clearCompletedBtn = document.getElementById('clearCompletedBtn');
     const confirmClearModal = document.getElementById('confirmClearModal'), confirmClearYes = document.getElementById('confirmClearYes'), confirmClearNo = document.getElementById('confirmClearNo');
+    const importConfirmModal = document.getElementById('importConfirmModal'), importStatsDiv = document.getElementById('importStats'), importCancelBtn = document.getElementById('importCancelBtn'), importConfirmBtn = document.getElementById('importConfirmBtn');
     const modalOverlay = document.getElementById('taskModal'), taskInput = document.getElementById('taskInput'), taskGoal = document.getElementById('taskGoal'), taskCurrent = document.getElementById('taskCurrent');
     const saveTaskBtn = document.getElementById('saveTaskBtn'), cancelModalBtn = document.getElementById('cancelModalBtn');
     let editingTaskId = null;
@@ -855,41 +851,26 @@
         updateSortMenuActive();
     }
 
-    // --- основная логика ---
-    function loadFromStorage() {
-        const stored = localStorage.getItem('darkTasksPro');
-        if (stored) {
-            tasks = JSON.parse(stored);
-            tasks = tasks.map(t => ({ ...t, createdAt: t.createdAt || Date.now(), priority: t.priority || 'normal', goal: t.goal !== undefined ? t.goal : null, current: t.current !== undefined ? t.current : null }));
-            nextId = tasks.length ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
-        } else {
-            tasks = [
-            	{ id: 1, title: 'Выпить Пива', completed: false, goal: null, current: null, priority: 'normal', createdAt: Date.now() - 86400000 },
-            	{ id: 2, title: 'Купить Пива', completed: true, goal: null, current: null, priority: 'medium', createdAt: Date.now() - 43200000 }];
-            nextId = 3;
+    // --- рендер с пустыми состояниями ---
+    function renderEmptyState(container, message, icon) {
+        if (container.children.length === 0) {
+            const emptyDiv = document.createElement('div');
+            emptyDiv.className = 'empty-placeholder';
+            emptyDiv.innerHTML = `<i class="bi ${icon}"></i>${message}`;
+            container.appendChild(emptyDiv);
         }
     }
-    function saveToStorage() { localStorage.setItem('darkTasksPro', JSON.stringify(tasks)); }
-    function filterTasks(list) { return list.filter(t => !searchQuery || t.title.toLowerCase().includes(searchQuery.toLowerCase())); }
-    function sortTasks(list) {
-        return [...list].sort((a, b) => {
-            switch (sortBy) {
-                case 'title_asc': return a.title.localeCompare(b.title);
-                case 'title_desc': return b.title.localeCompare(a.title);
-                case 'priority_high_low': { const order = { high:0, medium:1, normal:2 }; return (order[a.priority]??3) - (order[b.priority]??3); }
-                case 'priority_low_high': { const order = { normal:0, medium:1, high:2 }; return (order[a.priority]??3) - (order[b.priority]??3); }
-                case 'createdAt_asc': return a.createdAt - b.createdAt;
-                default: return b.createdAt - a.createdAt;
-            }
-        });
-    }
-    function showAllActionPanels() { document.querySelectorAll('.action-buttons').forEach(p => p.classList.add('show')); }
-    function hideAllActionPanels() { document.querySelectorAll('.action-buttons').forEach(p => p.classList.remove('show')); }
 
     function render() {
-        let active = sortTasks(filterTasks(tasks.filter(t => !t.completed))), completed = sortTasks(filterTasks(tasks.filter(t => t.completed)));
+        let active = sortTasks(filterTasks(tasks.filter(t => !t.completed)));
+        let completed = sortTasks(filterTasks(tasks.filter(t => t.completed)));
+        
         activeContainer.innerHTML = active.map(t => taskToHtml(t)).join('');
         completedContainer.innerHTML = completed.map(t => taskToHtml(t)).join('');
+        
+        renderEmptyState(activeContainer, 'Нет активных задач', 'bi-inbox');
+        renderEmptyState(completedContainer, 'Нет выполненных задач', 'bi-check2-circle');
+        
         completedDivider.style.display = completed.length ? 'flex' : 'none';
         document.getElementById('bulkPanel').style.display = (selectionMode && !manageMode) ? 'flex' : 'none';
         document.getElementById('selectedCount').innerText = selectedTaskIds.size;
@@ -899,6 +880,7 @@
         attachDelegatedEvents();
     }
 
+    // --- остальные функции (taskToHtml, attachDelegatedEvents и т.д.) ---
     function taskToHtml(task) {
         const leftCtrl = selectionMode && !task.completed ? `<span class="selection-checkbox" data-id="${task.id}" data-action="toggleSelect">${selectedTaskIds.has(task.id) ? '<i class="bi bi-check-lg"></i>' : ''}</span>` :
             (task.completed ? `<span class="custom-checkbox checked" data-id="${task.id}" data-action="toggleComplete"><i class="bi bi-check-lg"></i></span>` :
@@ -1019,18 +1001,103 @@
     function bulkSetPriority(priority){ for(let id of selectedTaskIds){ const t=tasks.find(t=>t.id===id); if(t) t.priority=priority; } saveToStorage(); render(); }
     function clearSelection(){ selectedTaskIds.clear(); render(); }
     function exportData(){ const blob=new Blob([JSON.stringify(tasks,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`tasks_${Date.now()}.json`; a.click(); URL.revokeObjectURL(a.href); }
-    function importData(){ const input=document.createElement('input'); input.type='file'; input.accept='application/json'; input.onchange=e=>{ const file=e.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=ev=>{ try{ const imported=JSON.parse(ev.target.result); if(Array.isArray(imported)&&confirm('Заменить текущий список?')){ tasks=imported.map(t=>({...t, createdAt:t.createdAt||Date.now(), priority:t.priority||'normal'})); nextId=tasks.length?Math.max(...tasks.map(t=>t.id))+1:1; saveToStorage(); render(); } } catch(e){ alert('Ошибка файла'); } }; reader.readAsText(file); }; input.click(); }
+    
+    // Кастомный импорт с модальным окном
+    function importData() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'application/json';
+        input.onchange = e => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = ev => {
+                try {
+                    const imported = JSON.parse(ev.target.result);
+                    if (!Array.isArray(imported)) throw new Error('Не массив');
+                    const clean = imported.map(t => ({
+                        ...t,
+                        createdAt: t.createdAt || Date.now(),
+                        priority: t.priority || 'normal',
+                        goal: t.goal !== undefined ? t.goal : null,
+                        current: t.current !== undefined ? t.current : null,
+                        completed: t.completed || false
+                    }));
+                    pendingImportedTasks = clean;
+                    const statsHtml = `
+                        <p><span>📥 Импортируется задач:</span> <strong>${clean.length}</strong></p>
+                        <p><span>🗑️ Текущих задач будет удалено:</span> <strong>${tasks.length}</strong></p>
+                        <p><span>🔄 После замены станет:</span> <strong>${clean.length}</strong></p>
+                    `;
+                    importStatsDiv.innerHTML = statsHtml;
+                    importConfirmModal.classList.add('show');
+                } catch(e) {
+                    alert('Ошибка: файл повреждён или имеет неверный формат.');
+                }
+            };
+            reader.readAsText(file);
+        };
+        input.click();
+    }
+    
+    function applyImport() {
+        if (pendingImportedTasks) {
+            tasks = pendingImportedTasks.map(t => ({ ...t }));
+            nextId = tasks.length ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
+            saveToStorage();
+            render();
+            pendingImportedTasks = null;
+        }
+        importConfirmModal.classList.remove('show');
+    }
+    
+    function cancelImport() {
+        pendingImportedTasks = null;
+        importConfirmModal.classList.remove('show');
+    }
+    
+    function loadFromStorage() {
+        const stored = localStorage.getItem('darkTasksPro');
+        if (stored) {
+            tasks = JSON.parse(stored);
+            tasks = tasks.map(t => ({ ...t, createdAt: t.createdAt || Date.now(), priority: t.priority || 'normal', goal: t.goal !== undefined ? t.goal : null, current: t.current !== undefined ? t.current : null }));
+            nextId = tasks.length ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
+        } else {
+            tasks = [
+            	{ id: 1, title: 'Выпить Пива', completed: false, goal: null, current: null, priority: 'normal', createdAt: Date.now() - 86400000 },
+            	{ id: 2, title: 'Купить Пива', completed: true, goal: null, current: null, priority: 'medium', createdAt: Date.now() - 43200000 }];
+            nextId = 3;
+        }
+    }
+    function saveToStorage() { localStorage.setItem('darkTasksPro', JSON.stringify(tasks)); }
+    function filterTasks(list) { return list.filter(t => !searchQuery || t.title.toLowerCase().includes(searchQuery.toLowerCase())); }
+    function sortTasks(list) {
+        return [...list].sort((a, b) => {
+            switch (sortBy) {
+                case 'title_asc': return a.title.localeCompare(b.title);
+                case 'title_desc': return b.title.localeCompare(a.title);
+                case 'priority_high_low': { const order = { high:0, medium:1, normal:2 }; return (order[a.priority]??3) - (order[b.priority]??3); }
+                case 'priority_low_high': { const order = { normal:0, medium:1, high:2 }; return (order[a.priority]??3) - (order[b.priority]??3); }
+                case 'createdAt_asc': return a.createdAt - b.createdAt;
+                default: return b.createdAt - a.createdAt;
+            }
+        });
+    }
+    function showAllActionPanels() { document.querySelectorAll('.action-buttons').forEach(p => p.classList.add('show')); }
+    function hideAllActionPanels() { document.querySelectorAll('.action-buttons').forEach(p => p.classList.remove('show')); }
+    
     function showClearConfirmModal(){ confirmClearModal.classList.add('show'); }
     function clearCompletedConfirmed(){ tasks=tasks.filter(t=>!t.completed); saveToStorage(); render(); confirmClearModal.classList.remove('show'); }
     function cancelClear(){ confirmClearModal.classList.remove('show'); }
     function toggleManageMode(){ if(manageMode){ hideAllActionPanels(); setTimeout(()=>{ manageMode=false; selectionMode=false; render(); },300); } else { manageMode=true; selectionMode=false; render(); } }
     function toggleSelectionMode(){ selectionMode=!selectionMode; if(selectionMode) manageMode=false; selectedTaskIds.clear(); render(); }
 
-    document.addEventListener('keydown',(e)=>{ if((e.ctrlKey||e.metaKey)&&e.key==='n'){ e.preventDefault(); openAddModal(); } if((e.ctrlKey||e.metaKey)&&e.key==='m'){ e.preventDefault(); toggleManageMode(); } if(e.key==='Escape'&&modalOverlay.classList.contains('show')) closeModal(); if(e.key==='Escape'&&confirmClearModal.classList.contains('show')) cancelClear(); });
+    document.addEventListener('keydown',(e)=>{ if((e.ctrlKey||e.metaKey)&&e.key==='n'){ e.preventDefault(); openAddModal(); } if((e.ctrlKey||e.metaKey)&&e.key==='m'){ e.preventDefault(); toggleManageMode(); } if(e.key==='Escape'&&modalOverlay.classList.contains('show')) closeModal(); if(e.key==='Escape'&&confirmClearModal.classList.contains('show')) cancelClear(); if(e.key==='Escape'&&importConfirmModal.classList.contains('show')) cancelImport(); });
     searchInput.addEventListener('input',(e)=>{ searchQuery=e.target.value; render(); });
     addTaskBtn.onclick=openAddModal; toggleManageBtn.onclick=toggleManageMode; selectionModeBtn.onclick=toggleSelectionMode; exportBtn.onclick=exportData; importBtn.onclick=importData; undoBtn.onclick=undoDelete; clearCompletedBtn.onclick=showClearConfirmModal; confirmClearYes.onclick=clearCompletedConfirmed; confirmClearNo.onclick=cancelClear; saveTaskBtn.onclick=saveTask; cancelModalBtn.onclick=closeModal; modalOverlay.onclick=(e)=>{ if(e.target===modalOverlay) closeModal(); };
     document.getElementById('bulkComplete').onclick=bulkComplete; document.getElementById('bulkDelete').onclick=bulkDelete; document.getElementById('bulkPriorityNormal').onclick=()=>bulkSetPriority('normal'); document.getElementById('bulkPriorityMedium').onclick=()=>bulkSetPriority('medium'); document.getElementById('bulkPriorityHigh').onclick=()=>bulkSetPriority('high'); document.getElementById('bulkClearSelection').onclick=clearSelection;
-
+    importConfirmBtn.onclick = applyImport;
+    importCancelBtn.onclick = cancelImport;
     taskGoal.addEventListener('input', updateCurrentFieldState);
     taskCurrent.addEventListener('input', function() {
         if (!taskCurrent.disabled && taskGoal.value.trim() !== "") {
