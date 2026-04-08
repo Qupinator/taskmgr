@@ -216,16 +216,16 @@
 
         /* Цветные иконки приоритетов в модальном окне */
         #priorityModalMenu .dropdown-item[data-priority="normal"] i.bi {
-            color: #9e9e9e; /* серый */
+            color: #9e9e9e;
         }
         #priorityModalMenu .dropdown-item[data-priority="medium"] i.bi {
-            color: #ffc107; /* жёлтый */
+            color: #ffc107;
         }
         #priorityModalMenu .dropdown-item[data-priority="high"] i.bi {
-            color: #dc3545; /* красный */
+            color: #dc3545;
         }
         #priorityModalMenu .dropdown-item:hover i.bi {
-            color: white; /* при наведении стандартный белый */
+            color: white;
         }
 
         .task-item {
@@ -452,7 +452,7 @@
         }
         .clear-completed-btn:hover { background: #dc3545; color: white; border-color: #dc3545; }
 
-        /* Пустые состояния */
+        /* Пустые состояния — только для активных задач */
         .empty-placeholder {
             text-align: center;
             padding: 40px 20px;
@@ -470,7 +470,7 @@
             color: #555;
         }
 
-        /* Модальные окна общие */
+        /* Модальные окна */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -515,6 +515,61 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
+        }
+        .form-control {
+            background: #18181b;
+            border: 1px solid #3f3f46;
+            color: #e4e4e7;
+            border-radius: 14px;
+            padding: 12px 16px;
+            font-size: 1rem;
+            outline: none;
+            width: 100%;
+        }
+        .form-control:focus {
+            border-color: #0d6efd;
+        }
+        .form-control:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .row-flex {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: nowrap;
+        }
+        .row-flex .form-control,
+        .row-flex .custom-dropdown {
+            flex: 1;
+            min-width: 0;
+            width: 100%;
+            min-width: 143px;
+        }
+        .input-with-icon {
+            position: relative;
+            flex: 1;
+        }
+        .input-with-icon .form-control {
+            padding-right: 2rem;
+        }
+        .input-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #0d6efd;
+            pointer-events: none;
+            font-size: 1.2rem;
+        }
+        
+        .modal-body .custom-dropdown .dropdown-menu {
+            width: 100%;
+            left: auto;
+            right: 0;
+            max-height: 220px;
+            overflow-y: auto;
+            min-width: 286px;
         }
         .modal-footer {
             display: flex;
@@ -628,7 +683,6 @@
     <div id="completedTasks"></div>
 </div>
 
-<!-- Модальное окно подтверждения очистки -->
 <div id="confirmClearModal" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
@@ -641,7 +695,6 @@
     </div>
 </div>
 
-<!-- Кастомное модальное окно импорта -->
 <div id="importConfirmModal" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
@@ -658,7 +711,6 @@
     </div>
 </div>
 
-<!-- Модальное окно добавления/редактирования задачи -->
 <div class="modal-overlay" id="taskModal">
     <div class="modal-content">
         <div class="modal-header">
@@ -697,7 +749,7 @@
 
 <script>
     let tasks = [], nextId = 1, manageMode = false, selectionMode = false, selectedTaskIds = new Set(), lastDeletedTask = null, searchQuery = "", sortBy = "createdAt_desc";
-    let pendingImportedTasks = null; // для хранения импортированных задач перед подтверждением
+    let pendingImportedTasks = null;
 
     const activeContainer = document.getElementById('activeTasks'), completedContainer = document.getElementById('completedTasks'), completedDivider = document.getElementById('completedDivider');
     const searchInput = document.getElementById('searchInput'), addTaskBtn = document.getElementById('addTaskBtn'), toggleManageBtn = document.getElementById('toggleManageMode'), selectionModeBtn = document.getElementById('selectionModeBtn');
@@ -708,7 +760,6 @@
     const saveTaskBtn = document.getElementById('saveTaskBtn'), cancelModalBtn = document.getElementById('cancelModalBtn');
     let editingTaskId = null;
 
-    // --- приоритет в модалке с цветными иконками ---
     let selectedPriority = "normal";
     const priorityDropdown = document.getElementById('priorityModalDropdown');
     const priorityToggle = document.getElementById('priorityModalToggle');
@@ -752,7 +803,6 @@
     function getSelectedPriority() { return selectedPriority; }
     function setPriorityDropdownValue(priority) { updatePriorityUI(priority); }
 
-    // --- управление полем current в зависимости от goal ---
     function updateCurrentFieldState() {
         const goalVal = taskGoal.value.trim();
         if (goalVal === "") {
@@ -773,7 +823,6 @@
         }
     }
 
-    // --- сортировочный дропдаун ---
     const sortDropdown = document.getElementById('sortDropdown');
     const sortToggle = document.getElementById('sortToggle');
     const sortMenu = document.getElementById('sortMenu');
@@ -851,13 +900,12 @@
         updateSortMenuActive();
     }
 
-    // --- рендер с пустыми состояниями ---
-    function renderEmptyState(container, message, icon) {
-        if (container.children.length === 0) {
+    function renderEmptyStateForActive() {
+        if (activeContainer.children.length === 0) {
             const emptyDiv = document.createElement('div');
             emptyDiv.className = 'empty-placeholder';
-            emptyDiv.innerHTML = `<i class="bi ${icon}"></i>${message}`;
-            container.appendChild(emptyDiv);
+            emptyDiv.innerHTML = `<i class="bi bi-inbox"></i>Нет активных задач`;
+            activeContainer.appendChild(emptyDiv);
         }
     }
 
@@ -868,8 +916,7 @@
         activeContainer.innerHTML = active.map(t => taskToHtml(t)).join('');
         completedContainer.innerHTML = completed.map(t => taskToHtml(t)).join('');
         
-        renderEmptyState(activeContainer, 'Нет активных задач', 'bi-inbox');
-        renderEmptyState(completedContainer, 'Нет выполненных задач', 'bi-check2-circle');
+        renderEmptyStateForActive(); // только для активных
         
         completedDivider.style.display = completed.length ? 'flex' : 'none';
         document.getElementById('bulkPanel').style.display = (selectionMode && !manageMode) ? 'flex' : 'none';
@@ -880,7 +927,6 @@
         attachDelegatedEvents();
     }
 
-    // --- остальные функции (taskToHtml, attachDelegatedEvents и т.д.) ---
     function taskToHtml(task) {
         const leftCtrl = selectionMode && !task.completed ? `<span class="selection-checkbox" data-id="${task.id}" data-action="toggleSelect">${selectedTaskIds.has(task.id) ? '<i class="bi bi-check-lg"></i>' : ''}</span>` :
             (task.completed ? `<span class="custom-checkbox checked" data-id="${task.id}" data-action="toggleComplete"><i class="bi bi-check-lg"></i></span>` :
@@ -1002,7 +1048,6 @@
     function clearSelection(){ selectedTaskIds.clear(); render(); }
     function exportData(){ const blob=new Blob([JSON.stringify(tasks,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`tasks_${Date.now()}.json`; a.click(); URL.revokeObjectURL(a.href); }
     
-    // Кастомный импорт с модальным окном
     function importData() {
         const input = document.createElement('input');
         input.type = 'file';
