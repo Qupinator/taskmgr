@@ -42,7 +42,7 @@
         #priorityModalMenu .dropdown-item[data-priority="medium"] i.bi { color: #ffc107; }
         #priorityModalMenu .dropdown-item[data-priority="high"] i.bi { color: #dc3545; }
         #priorityModalMenu .dropdown-item:hover i.bi { color: white; }
-        .task-item { position: relative; display: flex; align-items: center; padding: 0 18px; height: 66px; background: #1e1e1e; border: 1px solid #333; border-radius: 14px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; overflow: hidden; }
+        .task-item { position: relative; display: flex; align-items: center; padding: 0 18px; height: 66px; background: #1e1e1e; border: 1px solid #333; border-radius: 14px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s, background-color 0.2s, margin 0.25s, opacity 0.25s; overflow: hidden; }
         .task-item:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); }
         .task-item.priority-normal { border-color: var(--priority-normal, #444); background: rgba(108, 117, 125, 0.1); }
         .task-item.priority-medium { border-color: var(--priority-medium, #ffc107); background: rgba(255, 193, 7, 0.1); }
@@ -52,23 +52,27 @@
         .task-item.priority-high .counter-display { border-color: var(--priority-high, #dc3545); color: var(--priority-high, #dc3545); }
         .task-item.completed { background: rgba(40, 167, 69, 0.15); border-color: #28a745; }
         .task-item.completed .task-title { text-decoration: line-through; color: #888; }
+        .task-item.task-completing { background: #28a745 !important; border-color: #1e7e34 !important; transform: translateX(120%) !important; opacity: 0 !important; transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s, background 0.15s !important; }
         .task-title { flex: 1; margin: 0 16px; font-size: 1.2rem; line-height: 1.3; color: #f0f0f0; word-break: break-word; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .custom-checkbox, .selection-checkbox, .increment-btn { width: 28px; height: 28px; background: #2a2a2a; border: 2px solid #555; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; transition: all 0.2s; flex-shrink: 0; }
         .custom-checkbox:hover, .selection-checkbox:hover, .increment-btn:hover { transform: scale(1.05); border-color: #0d6efd; }
         .custom-checkbox.checked, .selection-checkbox.selected { background: #0d6efd; border-color: #0d6efd; color: white; }
         .increment-btn { font-weight: bold; color: #0d6efd; }
         .increment-btn:hover { background: #0d6efd; border-color: #0d6efd; color: white; }
-        .counter-display { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(10px); border: 1px solid #444; border-radius: 8px; padding: 4px 12px; height: 28px; display: flex; align-items: center; font-size: 0.95rem; font-weight: 500; color: #0d6efd; white-space: nowrap; transition: right 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1); z-index: 5; }
+        .counter-display { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(10px); border: 1px solid #444; border-radius: 8px; padding: 4px 12px; height: 28px; display: flex; align-items: center; font-size: 0.95rem; font-weight: 500; color: #0d6efd; white-space: nowrap; transition: right 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1), top 0.2s, transform 0.2s; z-index: 5; }
         .task-item .action-buttons.show ~ .counter-display { right: 150px; }
         .task-item.completed .action-buttons.show ~ .counter-display { right: 107px; }
+        .counter-position-top .counter-display { top: 8px; transform: translateY(0); right: 8px; }
+        .counter-position-top .task-item .action-buttons.show ~ .counter-display { right: 130px; }
         .action-buttons { position: absolute; right: 7px; top: 50%; transform: translateY(-50%) translateX(calc(100% + 8px)); opacity: 0; transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1), opacity 0.25s ease; display: flex; gap: 8px; pointer-events: none; padding: 9px; background: rgba(20, 20, 20, 0.3); backdrop-filter: blur(10px); border: 1px solid #444; border-radius: 14px; z-index: 10; }
         .action-buttons.show { transform: translateY(-50%) translateX(0); opacity: 1; pointer-events: auto; }
         .btn-icon { background: #1e1e1e; border: 1px solid #555; color: #0d6efd; font-size: 1rem; width: 32px; height: 32px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s, color 0.2s; }
         .btn-icon:hover { background: #0d6efd; color: white; }
         .btn-icon.minus:hover { background: #dc3545; border-color: #dc3545; color: white; }
         .progress-wrapper { position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: transparent; }
-        .progress-fill { height: 100%; background: rgba(255, 255, 255, 0.2); width: 0%; transition: width 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1); border-radius: 0px; border-top-right-radius: 8px; border-bottom-left-radius: 16px; }
-        .bulk-actions { background: rgba(30, 30, 40, 0.9); backdrop-filter: blur(12px); border: 1px solid rgba(13, 110, 253, 0.3); border-radius: 20px; padding: 16px; margin-bottom: 24px; box-shadow: 0 8px 20px rgba(0,0,0,0.5); transition: opacity 0.25s ease; }
+        .progress-fill { height: 100%; background: rgba(255, 255, 255, 0.2); transition: width 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1); border-radius: 0px; border-top-right-radius: 8px; border-bottom-left-radius: 16px; will-change: width; }
+        .bulk-actions { background: rgba(30, 30, 40, 0.9); backdrop-filter: blur(12px); border: 1px solid rgba(13, 110, 253, 0.3); border-radius: 20px; padding: 16px; margin-bottom: 24px; box-shadow: 0 8px 20px rgba(0,0,0,0.5); transition: opacity 0.25s ease, max-height 0.3s ease, margin 0.2s; overflow: hidden; max-height: 500px; opacity: 1; }
+        .bulk-actions.hidden-panel { max-height: 0; padding-top: 0; padding-bottom: 0; margin-bottom: 0; opacity: 0; border-width: 0; }
         .bulk-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
         .bulk-counter { font-size: 1.1rem; font-weight: 600; color: #0d6efd; background: rgba(13, 110, 253, 0.1); padding: 6px 16px; border-radius: 30px; border: 1px solid rgba(13, 110, 253, 0.3); display: inline-flex; align-items: center; gap: 8px; }
         .bulk-select-all, .bulk-deselect-all { background: transparent; border: 1px solid #444; color: #bbb; padding: 6px 14px; border-radius: 30px; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
@@ -195,6 +199,14 @@
             font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 4px;
         }
 
+        .settings-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .toggle-switch { position: relative; display: inline-block; width: 50px; height: 24px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #444; transition: .3s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: #0d6efd; }
+        input:checked + .slider:before { transform: translateX(26px); }
+
         @media (max-width: 680px) {
             .container { padding: 0; }
             .header { flex-direction: column; align-items: stretch; text-align: center; padding: 8px; }
@@ -249,7 +261,7 @@
         </div>
     </div>
 
-    <div id="bulkPanel" style="display: none;" class="bulk-actions">
+    <div id="bulkPanel" class="bulk-actions hidden-panel">
         <div class="bulk-header">
             <span class="bulk-counter"><i class="bi bi-check2-square"></i> Выбрано: <span id="selectedCount">0</span></span>
             <button class="bulk-select-all" id="bulkSelectAllActive"><i class="bi bi-check-all"></i> Все</button>
@@ -278,7 +290,6 @@
     <div id="completedTasks"></div>
 </div>
 
-<!-- Модальные окна -->
 <div id="confirmClearModal" class="modal-overlay">
     <div class="modal-content">
         <h2 class="modal-title">Удалить все выполненные?</h2>
@@ -313,7 +324,7 @@
             </div>
             <div class="row-flex">
                 <div class="input-with-icon">
-                    <input type="number" class="form-control" id="taskCurrent" placeholder="Нач." min="0" disabled>
+                    <input type="number" class="form-control" id="taskCurrent" placeholder="Нач. значен." min="0" disabled>
                     <i class="bi bi-123 input-icon"></i>
                 </div>
                 <div class="input-with-icon">
@@ -361,6 +372,13 @@
                 <div class="theme-buttons-row">
                     <button class="theme-btn-wide" id="themeLightBtn"><i class="bi bi-sun-fill"></i> Светлая</button>
                     <button class="theme-btn-wide" id="themeDarkBtn"><i class="bi bi-moon-fill"></i> Тёмная</button>
+                </div>
+            </div>
+            <div>
+                <h4 style="margin-bottom: 8px; font-weight: 500;">Позиция счётчика</h4>
+                <div class="theme-buttons-row">
+                    <button class="theme-btn-wide" id="counterPosCenterBtn"><i class="bi bi-arrow-down-up"></i> Стандарт</button>
+                    <button class="theme-btn-wide" id="counterPosTopBtn"><i class="bi bi-arrow-up-right"></i> В углу</button>
                 </div>
             </div>
             <div class="priority-color-block">
@@ -474,6 +492,8 @@
         };
         let tempTheme = currentTheme;
         let tempPriorityColors = { ...priorityColors };
+        let counterPosition = 'center';
+        let tempCounterPosition = counterPosition;
         let tasks = [], nextId = 1;
         let manageMode = false, selectionMode = false;
         let selectedTaskIds = new Set();
@@ -485,6 +505,7 @@
         let completedSectionCollapsed = false;
         let dragSrcElement = null;
         let currentEditingPriority = null;
+        let completingTasks = new Set();
 
         const activeContainer = document.getElementById('activeTasks');
         const completedContainer = document.getElementById('completedTasks');
@@ -517,6 +538,8 @@
         const settingsModal = document.getElementById('settingsModal');
         const themeLightBtn = document.getElementById('themeLightBtn');
         const themeDarkBtn = document.getElementById('themeDarkBtn');
+        const counterPosCenterBtn = document.getElementById('counterPosCenterBtn');
+        const counterPosTopBtn = document.getElementById('counterPosTopBtn');
         const highPreview = document.getElementById('highPreview');
         const mediumPreview = document.getElementById('mediumPreview');
         const normalPreview = document.getElementById('normalPreview');
@@ -535,6 +558,8 @@
         const versionBtn = document.getElementById('versionBtn');
         const versionModal = document.getElementById('versionModal');
         const closeVersion = document.getElementById('closeVersion');
+
+        const bulkPanel = document.getElementById('bulkPanel');
 
         versionBtn.addEventListener('click', () => versionModal.classList.add('show'));
         closeVersion.addEventListener('click', () => versionModal.classList.remove('show'));
@@ -555,12 +580,25 @@
         function openSettingsModal() {
             tempTheme = currentTheme;
             tempPriorityColors = { ...priorityColors };
+            tempCounterPosition = counterPosition;
             updateTempPreviews();
             themeLightBtn.classList.toggle('active', tempTheme === 'light');
             themeDarkBtn.classList.toggle('active', tempTheme === 'dark');
-            
+            counterPosCenterBtn.classList.toggle('active', tempCounterPosition === 'center');
+            counterPosTopBtn.classList.toggle('active', tempCounterPosition === 'top');
             settingsModal.classList.add('show');
         }
+
+        counterPosCenterBtn.addEventListener('click', () => {
+            tempCounterPosition = 'center';
+            counterPosCenterBtn.classList.add('active');
+            counterPosTopBtn.classList.remove('active');
+        });
+        counterPosTopBtn.addEventListener('click', () => {
+            tempCounterPosition = 'top';
+            counterPosTopBtn.classList.add('active');
+            counterPosCenterBtn.classList.remove('active');
+        });
 
         function updateTempPreviews() {
             highPreview.style.setProperty('--preview-color', tempPriorityColors.high);
@@ -575,8 +613,31 @@
             if (savedColors) {
                 priorityColors = JSON.parse(savedColors);
             }
+            const savedCounterPos = localStorage.getItem('counterPosition') || 'center';
+            counterPosition = savedCounterPos;
+            document.body.classList.toggle('counter-position-top', counterPosition === 'top');
+            updateTitleMaxWidth();
             updatePreviews();
             applyPriorityColors();
+        }
+
+        function updateTitleMaxWidth() {
+            const style = document.createElement('style');
+            style.id = 'title-max-width-style';
+            const oldStyle = document.getElementById('title-max-width-style');
+            if (oldStyle) oldStyle.remove();
+            if (counterPosition === 'top') {
+                style.textContent = `
+                    .task-item.has-counter .task-title { max-width: calc(100% - 87px); }
+                    .task-item:not(.has-counter) .task-title { max-width: calc(100% - 56px); }
+                `;
+            } else {
+                style.textContent = `
+                    .task-item.has-counter .task-title { max-width: calc(100% - 120px); }
+                    .task-item:not(.has-counter) .task-title { max-width: calc(100% - 56px); }
+                `;
+            }
+            document.head.appendChild(style);
         }
 
         function setTheme(theme) {
@@ -601,6 +662,7 @@
         function saveSettingsToStorage() {
             localStorage.setItem('theme', currentTheme);
             localStorage.setItem('priorityColors', JSON.stringify(priorityColors));
+            localStorage.setItem('counterPosition', counterPosition);
         }
 
         function loadFromStorage() {
@@ -642,11 +704,28 @@
                 toggleCompletedIcon.className = 'bi bi-chevron-down';
             }
 
-            document.getElementById('bulkPanel').style.display = (selectionMode && !manageMode) ? 'block' : 'none';
+            const showBulk = selectionMode && !manageMode;
+            if (showBulk) bulkPanel.classList.remove('hidden-panel');
+            else bulkPanel.classList.add('hidden-panel');
             document.getElementById('selectedCount').innerText = selectedTaskIds.size;
             toggleManageBtn.classList.toggle('active', manageMode);
             selectionModeBtn.classList.toggle('active', selectionMode);
-            if (manageMode) document.querySelectorAll('.action-buttons').forEach(el => el.classList.add('show'));
+
+            if (manageMode) {
+                requestAnimationFrame(() => {
+                    document.querySelectorAll('.action-buttons').forEach(el => el.classList.add('show'));
+                });
+            }
+
+            requestAnimationFrame(() => {
+                document.querySelectorAll('.progress-fill').forEach(fill => {
+                    const wrapper = fill.closest('.progress-wrapper');
+                    if (wrapper && wrapper.dataset.targetWidth) {
+                        fill.style.width = wrapper.dataset.targetWidth;
+                    }
+                });
+            });
+
             attachDragListeners();
             attachSwipeListeners();
             updateBulkButtonsState();
@@ -662,7 +741,7 @@
 
             let actionsHtml = '';
             if (manageMode && !selectionMode) {
-                actionsHtml = `<div class="action-buttons show">
+                actionsHtml = `<div class="action-buttons">
                     ${(task.goal && task.goal > 0 && !task.completed) ? `<button class="btn-icon minus" data-id="${task.id}" data-action="decrement"><i class="bi bi-dash-lg"></i></button>` : ''}
                     <button class="btn-icon" data-id="${task.id}" data-action="edit"><i class="bi bi-pencil-square"></i></button>
                     <button class="btn-icon" data-id="${task.id}" data-action="delete"><i class="bi bi-trash3"></i></button>
@@ -670,9 +749,11 @@
             }
 
             const counter = (task.goal && task.goal > 0) ? `<div class="counter-display">${task.current || 0}/${task.goal}</div>` : '';
-            const progress = (task.goal && task.goal > 0) ? `<div class="progress-wrapper"><div class="progress-fill" style="width: ${Math.min(100, ((task.current||0)/task.goal)*100)}%"></div></div>` : '';
+            const progressWidth = Math.min(100, ((task.current||0)/task.goal)*100) + '%';
+            const progress = (task.goal && task.goal > 0) ? `<div class="progress-wrapper" data-target-width="${progressWidth}"><div class="progress-fill" style="width: ${progressWidth}"></div></div>` : '';
+            const hasCounterClass = (task.goal && task.goal > 0) ? 'has-counter' : '';
 
-            return `<div class="task-item ${task.completed ? 'completed' : ''} priority-${task.priority}" data-id="${task.id}">
+            return `<div class="task-item ${task.completed ? 'completed' : ''} priority-${task.priority} ${hasCounterClass}" data-id="${task.id}">
                 ${dragHandle} ${leftCtrl} <span class="task-title">${escapeHtml(task.title)}</span> ${actionsHtml} ${counter} ${progress}
             </div>`;
         }
@@ -693,7 +774,6 @@
         }
         function priorityOrder(p) { return { high:0, medium:1, normal:2 }[p] ?? 3; }
 
-        // DRAG & DROP
         function attachDragListeners() {
             if (!manageMode || sortBy !== 'manual') return;
             document.querySelectorAll('.drag-handle').forEach(handle => {
@@ -763,11 +843,30 @@
                         if (task) deleteTaskTitle.textContent = `«${task.title}»`;
                         deleteConfirmModal.classList.add('show');
                     } else if (dx > 50) {
-                        toggleTaskCompletion(id);
+                        animateAndCompleteTask(id);
                     }
                     startX = null; isSwiping = false;
                 });
             });
+        }
+
+        function animateAndCompleteTask(id) {
+            const task = tasks.find(t => t.id === id);
+            if (!task || task.completed) return;
+            const element = document.querySelector(`.task-item[data-id="${id}"]`);
+            if (!element) return;
+            if (completingTasks.has(id)) return;
+            completingTasks.add(id);
+            element.classList.add('task-completing');
+            setTimeout(() => {
+                if (task.goal && task.goal > 0) {
+                    task.current = task.goal;
+                }
+                task.completed = true;
+                saveToStorage();
+                render();
+                completingTasks.delete(id);
+            }, 350);
         }
 
         function handleContainerClick(e) {
@@ -776,7 +875,15 @@
             const id = parseInt(target.dataset.id);
             const action = target.dataset.action;
             e.stopPropagation();
-            if (action === 'toggleComplete') toggleTaskCompletion(id);
+            if (action === 'toggleComplete') {
+                const task = tasks.find(t => t.id === id);
+                if (!task) return;
+                if (task.completed) {
+                    toggleTaskCompletion(id);
+                } else {
+                    if (!completingTasks.has(id)) animateAndCompleteTask(id);
+                }
+            }
             else if (action === 'toggleSelect') toggleSelectTask(id);
             else if (action === 'increment') incrementCounter(id);
             else if (action === 'decrement') decrementCounter(id);
@@ -795,8 +902,13 @@
         function toggleTaskCompletion(id) {
             const t = tasks.find(t => t.id === id);
             if (t) {
-                if (t.completed && t.goal) t.current = t.goal - 1;
-                t.completed = !t.completed;
+                if (t.completed) {
+                    t.completed = false;
+                    if (t.goal && t.goal > 0) t.current = t.goal - 1;
+                } else {
+                    if (t.goal && t.goal > 0) t.current = t.goal;
+                    t.completed = true;
+                }
                 saveToStorage(); render();
             }
         }
@@ -805,7 +917,10 @@
             const t = tasks.find(t => t.id === id);
             if (t && !t.completed && t.goal) {
                 t.current = (t.current || 0) + 1;
-                if (t.current >= t.goal) t.completed = true;
+                if (t.current >= t.goal) {
+                    t.completed = true;
+                    t.current = t.goal;
+                }
                 saveToStorage(); render();
             }
         }
@@ -1016,7 +1131,13 @@
         }
         function deselectAll() { selectedTaskIds.clear(); render(); }
         function bulkComplete() {
-            for (let id of selectedTaskIds) { const t = tasks.find(t => t.id === id); if (t && !t.completed) t.completed = true; }
+            for (let id of selectedTaskIds) {
+                const t = tasks.find(t => t.id === id);
+                if (t && !t.completed) {
+                    if (t.goal && t.goal > 0) t.current = t.goal;
+                    t.completed = true;
+                }
+            }
             selectedTaskIds.clear(); saveToStorage(); render();
         }
         function bulkDelete() {
@@ -1095,7 +1216,6 @@
             confirmClearModal.classList.remove('show');
         }
 
-        // Инициализация Color Picker (синхронизация полей)
         function initColorPicker() {
             colorPickerInput.addEventListener('input', () => {
                 const newColor = colorPickerInput.value;
@@ -1103,7 +1223,7 @@
                 const rgb = hexToRgb(newColor);
                 rgbInput.value = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
             });
-            
+
             hexInput.addEventListener('input', () => {
                 let val = hexInput.value.trim();
                 if (val.match(/^#[0-9A-Fa-f]{6}$/)) {
@@ -1112,7 +1232,7 @@
                     rgbInput.value = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
                 }
             });
-            
+
             rgbInput.addEventListener('input', () => {
                 let val = rgbInput.value.trim();
                 let match = val.match(/rgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)/);
@@ -1209,14 +1329,15 @@
         saveSettingsBtn.onclick = () => {
             currentTheme = tempTheme;
             priorityColors = { ...tempPriorityColors };
+            counterPosition = tempCounterPosition;
             document.body.classList.toggle('light-theme', currentTheme === 'light');
+            document.body.classList.toggle('counter-position-top', counterPosition === 'top');
+            updateTitleMaxWidth();
             applyPriorityColors();
             saveSettingsToStorage();
             render();
-            
             settingsModal.classList.remove('show');
         };
-        settingsBtn.onclick = openSettingsModal;
         cancelSettingsBtn.onclick = () => {
             settingsModal.classList.remove('show');
         };
@@ -1250,13 +1371,12 @@
         applyColorPicker.onclick = applyColorFromPicker;
         colorPickerModal.onclick = (e) => { if (e.target === colorPickerModal) colorPickerModal.classList.remove('show'); };
         searchInput.addEventListener('input', (e) => { searchQuery = e.target.value; render(); });
-        
-        // Инициализация при загрузке
+
         loadSettings();
         loadFromStorage();
         initSortDropdown();
         initPriorityDropdown();
-        initColorPicker(); // <-- Добавлено: синхронизация цветов
+        initColorPicker();
         render();
     })();
 </script>
